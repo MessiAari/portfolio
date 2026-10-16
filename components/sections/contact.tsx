@@ -95,11 +95,10 @@ export function Contact() {
           </button>
         </div>
 
-        <footer className="mt-20 flex flex-col gap-2 font-mono text-[11px] tracking-[0.08em] text-background/50 uppercase sm:flex-row sm:justify-between">
+        <footer className="mt-20 font-mono text-[11px] tracking-[0.08em] text-background/50 uppercase">
           <p>
             © {profile.name} · {profile.location.split(",")[0]}
           </p>
-          <p>Next.js · Tailwind · motion · Aceternity UI · Skiper UI · Gemini</p>
         </footer>
       </div>
     </section>

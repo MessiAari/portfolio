@@ -41,7 +41,6 @@ Links were checked with an HTTP request on 2026-10-16.
 | **Contact** | | |
 | GitHub: github.com/MessiAari | ✅ Yes | https://github.com/MessiAari (HTTP 200) |
 | LinkedIn: Aaritra Kumar | ✅ Yes | https://www.linkedin.com/in/aaritra-kumar-5712b230a/ (LinkedIn blocks automated checks with code 999; open it by hand in a browser to confirm) |
-| Footer "Next.js · Tailwind · motion · Aceternity UI · Skiper UI · Gemini" | ✅ Yes | `package.json` dependencies; `components/ui/*` credits; `app/api/chat/route.ts` |
 | **AI Chatbot** | | |
 | Chatbot name "Assist", "Answers questions about Aaritra's work" | ✅ Yes | `assistant` in `lib/portfolio-data.ts` |
 | Chatbot answers only from portfolio data and sends unknown questions to the email | ✅ Yes | `buildSystemPrompt()`; tested locally: "What's your CGPA?" → "not listed… email aaritra.25bcon2410@jecrcu.edu.in" |
