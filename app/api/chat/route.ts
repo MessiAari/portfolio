@@ -6,6 +6,14 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 const MODEL = "gemini-2.5-flash";
 const MAX_MESSAGES = 12; // only the most recent turns are sent to Gemini
 const MAX_CHARS = 1000; // per message
+const MAX_RETRY_WAIT = 8; // seconds we're willing to wait after a 429
+
+/** For a 429 error, returns how many seconds Gemini asks us to wait (or null). */
+function retryDelaySeconds(error: unknown): number | null {
+  if ((error as { status?: number }).status !== 429) return null;
+  const match = String((error as Error).message).match(/"retryDelay":"(\d+(?:\.\d+)?)s"/);
+  return match ? Number(match[1]) : null;
+}
 
 function isChatMessage(value: unknown): value is ChatMessage {
   const m = value as ChatMessage;
@@ -54,9 +62,9 @@ export async function POST(request: Request) {
     parts: [{ text: m.content.slice(0, MAX_CHARS) }],
   }));
 
-  try {
-    const ai = new GoogleGenAI({ apiKey });
-    const response = await ai.models.generateContent({
+  const ai = new GoogleGenAI({ apiKey });
+  const ask = () =>
+    ai.models.generateContent({
       model: MODEL,
       contents,
       config: {
@@ -66,6 +74,19 @@ export async function POST(request: Request) {
         thinkingConfig: { thinkingBudget: 0 }, // fast, direct answers
       },
     });
+
+  try {
+    let response;
+    try {
+      response = await ask();
+    } catch (error) {
+      // The free tier allows only a few requests per minute. When Gemini says
+      // "retry in a few seconds", wait that long and try once more.
+      const delay = retryDelaySeconds(error);
+      if (delay === null || delay > MAX_RETRY_WAIT) throw error;
+      await new Promise((resolve) => setTimeout(resolve, (delay + 0.5) * 1000));
+      response = await ask();
+    }
 
     const reply = response.text?.trim();
     if (!reply) {
