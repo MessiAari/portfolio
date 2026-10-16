@@ -1,6 +1,6 @@
 # Aaritra Kumar — Portfolio
 
-A scroll-driven personal portfolio for **Aaritra Kumar (Aari)**, B.Tech CSE student at JECRC University, Jaipur, with a built-in AI chatbot that answers questions about his skills and projects.
+A scroll-driven personal portfolio for **Aaritra Kumar**, B.Tech CSE student at JECRC University, Jaipur, with a built-in AI assistant, **Assist**, that answers visitors' questions about Aaritra's skills and projects.
 
 **Live site:** _add the Vercel URL here after deploying_
 **Repository:** https://github.com/MessiAari/portfolio
@@ -10,7 +10,7 @@ A scroll-driven personal portfolio for **Aaritra Kumar (Aari)**, B.Tech CSE stud
 - **Next.js 16** (App Router) + **TypeScript**
 - **Tailwind CSS v4**
 - **motion** (`motion/react`) for scroll-linked and entrance animations
-- **Aceternity UI** components: Spotlight, Flip Words, Text Generate Effect, Floating Navbar, Card Spotlight, Infinite Moving Cards, Timeline
+- **Aceternity UI** components: Flip Words, Text Generate Effect, Floating Navbar, Card Spotlight, Infinite Moving Cards, Timeline (restyled to match the site)
 - **Skiper UI** (free) components: Text Scroll animation (skiper31), Card stack scroll (skiper16, as inspiration), Theme toggle button (skiper4)
 - **Google Gemini API** (`@google/genai`, model `gemini-2.5-flash`) for the chatbot
 - **Vercel** for hosting
@@ -19,18 +19,18 @@ A scroll-driven personal portfolio for **Aaritra Kumar (Aari)**, B.Tech CSE stud
 
 | Section | What it does |
 | --- | --- |
-| **Home** | Pinned hero with spotlight beams; the name, rotating taglines ("I build with AI." / "I ship products." / "I learn by building.") and intro shrink and fade as you scroll |
+| **Home** | Pinned editorial hero: the name rises in on load, the taglines rotate ("I build with AI." / "I ship products." / "I learn by building.") and everything drifts up and fades as you scroll |
 | **Decide. Direct. Ship.** | Pinned interlude: each word assembles letter by letter as you scroll |
-| **About Me** | Photo with parallax, intro paragraph that reveals word by word with scroll, education/location/email facts |
-| **Skills** | Animated grid of 7 skill groups + two marquee rows that also drift with scroll |
+| **About Me** | Photo that opens up and moves with parallax, intro paragraph that reveals word by word with scroll, education/location/email facts |
+| **Skills** | Ruled list of 7 skill groups + two large type tickers that also drift with scroll |
 | **Projects** | 5 project cards (title, description, details, technologies, GitHub link, live link) that stack on top of each other while scrolling, plus **live search and tech filter chips** |
 | **Journey** | Timeline whose line fills in as you scroll |
-| **Contact** | Email (with copy button), GitHub, LinkedIn, location |
-| **AI Chatbot** | Floating "Ask AI" button on every section → chat panel with suggested questions, typing indicator and friendly error handling |
+| **Contact** | Inverted (ink) block: email with copy button, GitHub, LinkedIn, location |
+| **AI Chatbot: Assist** | Floating "Ask Assist" button on every section → chat panel with suggested questions, typing indicator and friendly error handling. The name is a nod to the `MessiAari` handle (Messi, king of the assist) |
 
 Also:
 
-- **Light/dark mode toggle**: defaults to the OS setting (`prefers-color-scheme`), remembers your choice in `localStorage`, no flash on load.
+- **Light/dark mode toggle**: cream paper with warm ink (light) and warm charcoal with cream text (dark), one burnt-vermilion accent. Defaults to the OS setting (`prefers-color-scheme`), remembers your choice in `localStorage`, no flash on load.
 - **Responsive** down to 375px phones, no horizontal scrolling.
 - **Reduced motion**: if the OS asks for reduced motion, scroll effects and animations are switched off.
 - **All content in one file**: `lib/portfolio-data.ts` feeds both the UI and the chatbot's knowledge.
@@ -84,13 +84,14 @@ Next.js server route (app/api/chat/route.ts)
    │  1. reads GEMINI_API_KEY from the server environment (Vercel env var / .env.local)
    │  2. builds the system prompt from lib/portfolio-data.ts (buildSystemPrompt)
    │  3. calls Gemini gemini-2.5-flash with the last 12 messages
+   │     (on a 429 asking to wait ≤ 8 s, it waits and retries once)
    ▼
 Google Gemini  →  reply text  →  { reply }  →  shown as a chat bubble
 ```
 
-- The system prompt tells Gemini to answer **only** from the portfolio data, and if it doesn't know, to say so and point to Aari's email.
+- The system prompt tells Gemini to answer **only** from the portfolio data, and if it doesn't know, to say so and point to Aaritra's email.
 - The key is **never exposed**: it has no `NEXT_PUBLIC_` prefix, is only read inside the server route, and `.env.local` is git-ignored. `.env.example` shows the variable name without a value.
-- **Error handling**: a missing key, a network failure or a 429 quota error returns a non-200 status, and the chat shows *"Sorry, I couldn't reach the AI right now. Please try again in a moment."* The page never crashes.
+- **Error handling**: the free Gemini tier allows 5 requests per minute. A missing key, a network failure or a 429 quota error returns a non-200 status, and the chat shows *"Sorry, I couldn't reach the AI right now. Please try again in a moment."* The page never crashes.
 
 ## How search & filter work
 
