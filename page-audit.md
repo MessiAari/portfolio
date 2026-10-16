@@ -1,0 +1,50 @@
+# Page Audit
+
+Every claim on the portfolio page, checked against its source. All content comes from `lib/portfolio-data.ts`.
+Links were checked with an HTTP request on 2026-10-16.
+
+| Content on the page | True? | Evidence |
+| --- | --- | --- |
+| **Home** | | |
+| Name "Aaritra Kumar", goes by "Aari" | ✅ Yes | Aari's own details in the project brief; same name on GitHub profile `MessiAari` |
+| Badge "B.Tech CSE · JECRC University, Jaipur" | ✅ Yes | Enrolled in B.Tech CSE at JECRC University, roll 25BCON2410; college email domain `jecrcu.edu.in` |
+| Taglines "I build with AI." / "I ship products." / "I learn by building." | ✅ Yes | Tagline options chosen by Aari in the brief; supported by the 5 shipped projects below |
+| "Computer Science student at JECRC University, turning ideas into things people can actually use." | ✅ Yes | Taken from Aari's own intro text |
+| **Decide. Direct. Ship.** + "I decide what to build, direct the work, and ship it." | ✅ Yes | Direct quote from Aari's intro |
+| **About Me** | | |
+| Photo | ✅ Yes | `public/aaritra.jpg`, supplied by Aari |
+| Intro paragraph ("I'm Aaritra, a Computer Science student at JECRC University who builds fast with AI…") | ✅ Yes | Aari's own draft intro, word for word |
+| Education: B.Tech in Computer Science & Engineering, JECRC University, Jaipur | ✅ Yes | Aari's details; university email address |
+| Batch 2025 · Roll no. 25BCON2410 | ✅ Yes | Roll number appears in the college email `aaritra.25bcon2410@jecrcu.edu.in` |
+| Location: Jaipur, Rajasthan, India / "Based in Jaipur, India" | ✅ Yes | Aari's details; JECRC University is in Jaipur |
+| Email: aaritra.25bcon2410@jecrcu.edu.in | ✅ Yes | Aari's college email (mailto link works) |
+| **Skills** | | |
+| Languages: Python, JavaScript, TypeScript, HTML, CSS | ✅ Yes | Python: projects 1–3; HTML/CSS/JS: projects 4–5; TypeScript: this portfolio's source code |
+| Frameworks: React, Next.js, React Native (Expo), Tailwind CSS | ✅ Yes | Next.js + React + Tailwind: this portfolio; Expo listed by Aari |
+| Backend & data: Supabase, SQLite, REST APIs | ✅ Yes | Listed by Aari; REST API: this site's `/api/chat` route |
+| AI: Claude Code, Gemini API, Groq, ElevenLabs, prompt engineering | ✅ Yes | Gemini API + prompt engineering: this site's chatbot; AI-assisted projects 2 and 3; others listed by Aari |
+| Payments: Razorpay, PayPal | ✅ Yes | Listed by Aari |
+| Tools: Git & GitHub, Vercel, VS Code, Cursor, Google Colab | ✅ Yes | GitHub repos below; Vercel deployment of the reading list app; others listed by Aari |
+| Practices: unit testing (RED → FIX → GREEN), debugging, refactoring | ✅ Yes | Project 3 (9 unit tests, 3 bugs fixed) and project 2 (refactor) |
+| **Projects** | | |
+| 1. Python Programs Collection: factorial (iterative + recursive), Fibonacci, structure-to-dictionary (dataclass, object, tuple list, records) | ✅ Yes | Repo https://github.com/MessiAari/python-programs-collection (HTTP 200) |
+| 2. Messy Python Code Improvement: clear names, input validation, built-ins, grade table, same output | ✅ Yes | Repo https://github.com/MessiAari/messy-python-code-improvement (HTTP 200) |
+| 3. Bug Fixing Using AI: wrong average (len-1), pass boundary (`>` vs `>=` 40), unreachable Distinction; 4 failures + 1 error → 9/9 passing | ✅ Yes | Repo https://github.com/MessiAari/bug-fixing-student-utils (HTTP 200) |
+| 4. Interactive Quiz Application: 5 questions, progress, one answer per question, score, Play Again | ✅ Yes | Repo https://github.com/MessiAari/interactive-quiz-app (HTTP 200) |
+| 5. Book Reading List Application: statuses, filter, change status, delete, counts, duplicate check, 60-char limit, localStorage | ✅ Yes | Repo https://github.com/MessiAari/reading-list-app (HTTP 200) |
+| "Live" badge + Live demo link on the Reading List card | ✅ Yes | https://reading-list-app-wheat.vercel.app/ (HTTP 200) |
+| "Five projects, from Python fundamentals to apps running in the browser" | ✅ Yes | 3 Python projects + 2 browser apps listed above |
+| **Journey** | | |
+| 2025: started B.Tech CSE at JECRC University | ✅ Yes | Batch 2025 |
+| Python → Quality → Web steps | ✅ Content · ⚠️ order to confirm | Each step names only the projects above. The order follows the course; Aari to confirm |
+| Now: building full-stack apps with AI tools; "This portfolio, with its Gemini chatbot, is one of them" | ✅ Yes | Aari's intro ("full-stack web apps with payments and AI voice"); this site |
+| **Contact** | | |
+| GitHub: github.com/MessiAari | ✅ Yes | https://github.com/MessiAari (HTTP 200) |
+| LinkedIn: Aaritra Kumar | ✅ Yes | https://www.linkedin.com/in/aaritra-kumar-5712b230a/ (LinkedIn blocks automated checks with code 999; open it by hand in a browser to confirm) |
+| Footer "Built with Next.js, Tailwind CSS, motion, Aceternity UI & Skiper UI · Chat by Gemini" | ✅ Yes | `package.json` dependencies; `components/ui/*` credits; `app/api/chat/route.ts` |
+| **AI Chatbot** | | |
+| Chatbot answers only from portfolio data and sends unknown questions to the email | ✅ Yes | `buildSystemPrompt()` in `lib/portfolio-data.ts` |
+| Friendly error message when the AI can't be reached | ✅ Yes | Tested locally with no API key: the chat showed "Sorry, I couldn't reach the AI right now…" |
+| Live answers on the deployed site | ⏳ Pending | Test after adding `GEMINI_API_KEY` on Vercel |
+
+**Not on the page (on purpose):** the "beyond coursework" builds (ScopeDrop, AutoSoul, Crunchie Wunche, hackathons) are hidden until Aari confirms them (`showOtherBuilds = false` in `lib/portfolio-data.ts`).
