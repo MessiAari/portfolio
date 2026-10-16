@@ -9,14 +9,7 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import {
-  IconBrandGithub,
-  IconCheck,
-  IconExternalLink,
-  IconMoodEmpty,
-  IconSearch,
-  IconX,
-} from "@tabler/icons-react";
+import { IconSearch, IconX } from "@tabler/icons-react";
 import { CardSpotlight } from "@/components/ui/card-spotlight";
 import { SectionHeading } from "@/components/section-heading";
 import { projects, projectTechs, type Project } from "@/lib/portfolio-data";
@@ -50,38 +43,43 @@ export function Projects() {
   };
 
   return (
-    <section id="projects" className="relative px-5 py-24 md:py-36">
-      <div className="mx-auto max-w-5xl">
+    <section id="projects" className="relative px-4 py-24 md:px-6 md:py-36">
+      <div className="mx-auto max-w-6xl">
         <SectionHeading
-          eyebrow="03 — Projects"
-          title="Things I've built"
+          index="03"
+          label="Projects"
+          title="Selected work"
           description="Five projects, from Python fundamentals to apps running in the browser. Search by name or technology, or pick a filter."
         />
 
-        <div className="mt-12 space-y-4">
+        <div className="mt-12 md:ml-[232px]">
           <label className="relative block">
             <span className="sr-only">Search projects by name or technology</span>
-            <IconSearch className="pointer-events-none absolute top-1/2 left-5 h-5 w-5 -translate-y-1/2 text-muted" />
+            <IconSearch
+              stroke={1.5}
+              className="pointer-events-none absolute top-1/2 left-0 h-5 w-5 -translate-y-1/2 text-muted"
+            />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder='Search projects, e.g. "Python", "Quiz", "Book"'
-              className="w-full rounded-full border border-border bg-card py-4 pr-12 pl-13 text-base text-foreground shadow-sm outline-none placeholder:text-muted/70 focus:border-accent/60 focus:ring-4 focus:ring-accent/15 [&::-webkit-search-cancel-button]:hidden"
+              placeholder="Search: Python, Quiz, Book…"
+              className="w-full border-b border-foreground/40 bg-transparent py-3 pr-10 pl-8 font-serif text-2xl text-foreground outline-none placeholder:text-muted/60 focus:border-accent md:text-3xl [&::-webkit-search-cancel-button]:hidden"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
                 aria-label="Clear search"
-                className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full p-1 text-muted hover:bg-foreground/10 hover:text-foreground"
+                className="absolute top-1/2 right-0 -translate-y-1/2 p-1 text-muted hover:text-foreground"
               >
-                <IconX className="h-4 w-4" />
+                <IconX className="h-5 w-5" />
               </button>
             )}
           </label>
 
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by technology">
+          <div className="mt-5 flex flex-wrap items-center gap-2" role="group" aria-label="Filter by technology">
+            <span className="mr-1 font-mono text-[11px] tracking-[0.14em] text-muted uppercase">Filter</span>
             {[null, ...projectTechs].map((tech) => {
               const active = activeTech === tech;
               return (
@@ -91,10 +89,10 @@ export function Projects() {
                   aria-pressed={active}
                   onClick={() => setActiveTech(tech)}
                   className={cn(
-                    "rounded-full border px-4 py-1.5 text-sm transition-colors",
+                    "rounded-full border px-3 py-1 text-[13px] transition-colors",
                     active
                       ? "border-foreground bg-foreground text-background"
-                      : "border-border bg-card text-muted hover:border-foreground/30 hover:text-foreground",
+                      : "border-border text-foreground/70 hover:border-foreground/50 hover:text-foreground",
                   )}
                 >
                   {tech ?? "All"}
@@ -103,8 +101,8 @@ export function Projects() {
             })}
           </div>
 
-          <p className="font-mono text-xs text-muted" aria-live="polite">
-            Showing {filteredProjects.length} of {projects.length} projects
+          <p className="mt-4 font-mono text-[11px] tracking-[0.14em] text-muted uppercase" aria-live="polite">
+            {filteredProjects.length} of {projects.length} projects
           </p>
         </div>
 
@@ -115,18 +113,13 @@ export function Projects() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="mt-10 flex flex-col items-center rounded-3xl border border-dashed border-border px-6 py-16 text-center"
+              className="mt-12 border-y border-border py-16 text-center md:ml-[232px]"
             >
-              <IconMoodEmpty className="h-10 w-10 text-muted" />
-              <p className="mt-4 text-lg font-medium">No projects match your search</p>
-              <p className="mt-1 text-sm text-muted">
-                Try &quot;Python&quot;, &quot;JavaScript&quot; or &quot;Book&quot; instead.
+              <p className="font-serif text-4xl italic">Nothing here yet.</p>
+              <p className="mt-3 text-sm text-muted">
+                No projects match your search. Try &quot;Python&quot;, &quot;JavaScript&quot; or &quot;Book&quot;.
               </p>
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="mt-6 rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background"
-              >
+              <button type="button" onClick={resetFilters} className="link mt-6 text-sm font-medium">
                 Show all projects
               </button>
             </motion.div>
@@ -157,7 +150,7 @@ function ProjectStack({ projects }: { projects: Project[] }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
 
   return (
-    <div ref={ref} className="mt-10 flex flex-col gap-[12svh] pb-[4svh]">
+    <div ref={ref} className="mt-12 flex flex-col gap-[12svh] pb-[4svh]">
       {projects.map((project, i) => (
         <ProjectCard
           key={project.id}
@@ -183,71 +176,54 @@ function ProjectCard({
   progress: MotionValue<number>;
 }) {
   const reduce = useReducedMotion();
-  const targetScale = 1 - (total - index - 1) * 0.04;
+  const targetScale = 1 - (total - index - 1) * 0.035;
   const scale = useTransform(progress, [index / total, 1], reduce ? [1, 1] : [1, targetScale]);
   const number = String(projects.findIndex((p) => p.id === project.id) + 1).padStart(2, "0");
 
   return (
-    <div className="sticky" style={{ top: `calc(5.5rem + ${index * 1.25}rem)` }}>
+    <div className="sticky" style={{ top: `calc(4.5rem + ${index * 1.1}rem)` }}>
       <motion.article style={{ scale }} className="origin-top">
-        <CardSpotlight className="rounded-[2rem] border border-border bg-card p-6 shadow-2xl shadow-black/10 sm:p-8 md:p-10">
-          <div className="grid gap-8 md:grid-cols-[1.1fr_1fr]">
+        <CardSpotlight className="rounded-md border border-border bg-card p-6 shadow-[0_-12px_40px_-20px_rgb(0_0_0/0.35)] sm:p-8 md:p-10">
+          <div className="flex items-baseline justify-between gap-4 border-b border-border pb-4">
+            <span className="font-serif text-4xl text-accent md:text-5xl">{number}</span>
+            <ul className="flex flex-wrap justify-end gap-x-3 gap-y-1 font-mono text-[11px] tracking-[0.1em] text-muted uppercase" aria-label="Technologies">
+              {project.tech.map((tech) => (
+                <li key={tech}>{tech}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-6 grid gap-8 md:grid-cols-[1.15fr_1fr] md:gap-12">
             <div className="flex flex-col">
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-sm text-accent">{number}</span>
-                <span className="h-px flex-1 bg-border" />
-                {project.live && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Live
-                  </span>
-                )}
-              </div>
-              <h3 className="mt-5 text-2xl font-semibold tracking-tight text-balance md:text-3xl">
+              <h3 className="font-serif text-[2rem] leading-[1.02] tracking-[-0.01em] text-balance md:text-5xl">
                 {project.title}
               </h3>
-              <p className="mt-3 text-sm text-pretty text-muted md:text-base">
-                {project.description}
-              </p>
-              <ul className="mt-5 flex flex-wrap gap-2" aria-label="Technologies">
-                {project.tech.map((tech) => (
-                  <li
-                    key={tech}
-                    className="rounded-full border border-border bg-background/60 px-3 py-1 font-mono text-xs text-foreground/80"
-                  >
-                    {tech}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 flex flex-wrap gap-3 md:mt-auto md:pt-6">
-                <a
-                  href={project.repo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:opacity-90"
-                >
-                  <IconBrandGithub className="h-4 w-4" /> View code
+              <p className="mt-4 text-[15px] text-pretty text-foreground/75">{project.description}</p>
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium md:mt-auto md:pt-8">
+                <a href={project.repo} target="_blank" rel="noopener noreferrer" className="link">
+                  Code on GitHub ↗
                 </a>
                 {project.live && (
                   <a
                     href={project.live}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition hover:bg-foreground/5"
+                    className="link text-accent"
                   >
-                    <IconExternalLink className="h-4 w-4" /> Live demo
+                    Live site ↗
                   </a>
                 )}
               </div>
             </div>
 
-            <ul className="space-y-3 border-t border-border pt-6 md:border-t-0 md:border-l md:pt-0 md:pl-8">
-              {project.highlights.map((point) => (
-                <li key={point} className="flex gap-3 text-sm text-foreground/85">
-                  <IconCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+            <ol className="space-y-3 text-sm text-foreground/80">
+              {project.highlights.map((point, i) => (
+                <li key={point} className="grid grid-cols-[1.75rem_1fr] border-t border-border pt-3">
+                  <span className="font-mono text-[11px] text-muted">{String(i + 1).padStart(2, "0")}</span>
                   <span>{point}</span>
                 </li>
               ))}
-            </ul>
+            </ol>
           </div>
         </CardSpotlight>
       </motion.article>

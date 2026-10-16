@@ -3,30 +3,34 @@
 import { motion } from "motion/react";
 import { otherBuilds } from "@/lib/portfolio-data";
 
-/** Optional strip of beyond-coursework builds (enabled via `showOtherBuilds`). */
+/** Optional list of beyond-coursework builds (enabled via `showOtherBuilds`). */
 export function OtherBuilds() {
   return (
-    <section aria-labelledby="other-builds" className="px-5 pb-24">
-      <div className="mx-auto max-w-6xl">
-        <h2 id="other-builds" className="font-mono text-xs tracking-[0.2em] text-accent uppercase">
-          Beyond coursework
+    <section aria-labelledby="other-builds" className="px-4 pb-24 md:px-6">
+      <div className="mx-auto max-w-6xl md:pl-[232px]">
+        <h2 id="other-builds" className="font-mono text-[11px] tracking-[0.18em] text-muted uppercase">
+          Also built, beyond coursework
         </h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mt-4 border-b border-border">
           {otherBuilds.map((build, i) => (
-            <motion.div
+            <motion.li
               key={build.name}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ delay: i * 0.08, duration: 0.5 }}
-              className="rounded-3xl border border-border bg-card p-5"
+              transition={{ delay: i * 0.06, duration: 0.5 }}
+              className="grid gap-2 border-t border-border py-5 sm:grid-cols-[200px_1fr] sm:gap-6"
             >
-              <h3 className="font-semibold">{build.name}</h3>
-              <p className="mt-2 text-sm text-muted">{build.description}</p>
-              <p className="mt-4 font-mono text-xs text-foreground/70">{build.tech.join(" · ")}</p>
-            </motion.div>
+              <h3 className="font-serif text-2xl">{build.name}</h3>
+              <div>
+                <p className="text-[15px] text-foreground/80">{build.description}</p>
+                <p className="mt-2 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
+                  {build.tech.join(" / ")}
+                </p>
+              </div>
+            </motion.li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

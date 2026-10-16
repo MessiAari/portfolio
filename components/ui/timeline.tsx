@@ -36,16 +36,16 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
         {data.map((item, index) => (
           <div key={index} className="flex justify-start pt-10 md:gap-10 md:pt-32">
             <div className="sticky top-32 z-40 flex max-w-xs flex-col items-center self-start md:w-full md:flex-row lg:max-w-sm">
-              <div className="absolute left-3 flex h-10 w-10 items-center justify-center rounded-full bg-background">
-                <div className="h-4 w-4 rounded-full border border-border bg-card p-2" />
+              <div className="absolute left-3 flex h-10 w-10 items-center justify-center bg-background">
+                <div className="h-3 w-3 rotate-45 border border-accent bg-background" />
               </div>
-              <h3 className="hidden text-xl font-bold text-muted md:block md:pl-20 md:text-5xl">
+              <h3 className="hidden font-serif text-xl text-muted md:block md:pl-20 md:text-6xl">
                 {item.title}
               </h3>
             </div>
 
             <div className="relative w-full pr-2 pl-20 md:pl-4">
-              <h3 className="mb-4 block text-left text-2xl font-bold text-muted md:hidden">
+              <h3 className="mb-3 block text-left font-serif text-3xl text-muted md:hidden">
                 {item.title}
               </h3>
               {item.content}
@@ -58,7 +58,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
         >
           <motion.div
             style={{ height: heightTransform, opacity: opacityTransform }}
-            className="absolute inset-x-0 top-0 w-[2px] rounded-full bg-gradient-to-t from-accent-2 from-[0%] via-accent via-[10%] to-transparent"
+            className="absolute inset-x-0 top-0 w-[2px] rounded-full bg-gradient-to-t from-accent from-[0%] via-accent via-[10%] to-transparent"
           />
         </div>
       </div>

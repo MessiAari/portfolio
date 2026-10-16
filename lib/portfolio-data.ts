@@ -35,7 +35,7 @@ export type OtherBuild = {
 
 export const profile = {
   name: "Aaritra Kumar",
-  nickname: "Aari",
+  firstName: "Aaritra",
   role: "Computer Science student · AI-first builder",
   degree: "B.Tech in Computer Science & Engineering",
   university: "JECRC University, Jaipur",
@@ -54,6 +54,12 @@ export const profile = {
     "I'm Aaritra, a Computer Science student at JECRC University who builds fast with AI. I treat tools like Claude Code as my engineering team: I decide what to build, direct the work, and ship it. From Python fundamentals to full-stack web apps with payments and AI voice, I like turning ideas into things people can actually use.",
   // The three verbs from the intro, used for the scroll-assembled statement.
   manifesto: ["Decide", "Direct", "Ship"],
+};
+
+// The chatbot's name: a nod to the MessiAari handle (Messi, king of the assist).
+export const assistant = {
+  name: "Assist",
+  tagline: `Answers questions about ${profile.firstName}'s work`,
 };
 
 export const navItems = [
@@ -192,7 +198,7 @@ export const journey: JourneyStep[] = [
 
 /**
  * Beyond-coursework builds. Kept off the page (and out of the chatbot) until
- * Aari confirms they should be shown: flip `showOtherBuilds` to true.
+ * Aaritra confirms they should be shown: flip `showOtherBuilds` to true.
  */
 export const showOtherBuilds = false;
 
@@ -255,19 +261,19 @@ export function buildSystemPrompt(): string {
         .join("\n")}`
     : "";
 
-  return `You are the AI assistant on ${profile.name}'s portfolio website. ${profile.name} goes by "${profile.nickname}".
-Answer visitors' questions about ${profile.nickname} in a friendly, concise way (usually 2-5 sentences or a short list).
-Speak about ${profile.nickname} in the third person, but if someone asks "Who are you?" or uses "you" to mean ${profile.nickname}, answer about ${profile.nickname} (e.g. "I'm Aari's portfolio assistant. Aari is ...").
+  return `You are ${assistant.name}, the AI assistant on ${profile.name}'s portfolio website.
+Answer visitors' questions about ${profile.firstName} in a friendly, concise way (usually 2-5 sentences or a short list).
+Always refer to ${profile.firstName} by this name, never a nickname. Speak about ${profile.firstName} in the third person, but if someone asks "Who are you?" or uses "you" to mean ${profile.firstName}, answer about ${profile.firstName} (e.g. "I'm ${assistant.name}, ${profile.firstName}'s portfolio assistant. ${profile.firstName} is ...").
 
 RULES
 - Use ONLY the information below. Do not invent projects, skills, grades, dates, employers or links.
 - If the answer is not in the information below, say you don't know and suggest emailing ${profile.email}.
 - Share links exactly as written below.
 - Plain text only. You may use simple "- " bullet lists. No markdown: no headings, bold, tables or backticks.
-- Politely decline requests unrelated to ${profile.nickname}'s portfolio.
+- Politely decline requests unrelated to ${profile.firstName}'s portfolio.
 
 PROFILE
-- Name: ${profile.name} (goes by ${profile.nickname})
+- Name: ${profile.name}
 - Education: ${profile.degree}, ${profile.university} (batch ${profile.batch}, roll number ${profile.roll})
 - Location: ${profile.location}
 - Email: ${profile.email}

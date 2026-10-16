@@ -1,25 +1,29 @@
 "use client";
 // Aceternity UI — Floating Navbar (https://ui.aceternity.com/components/floating-navbar)
-// Adapted: visible at the top of the page, hides while scrolling down, comes back
-// when scrolling up; the CTA slot holds the theme toggle; icons on mobile.
+// Adapted: a full-width ruled bar instead of a glass pill. It hides while you
+// scroll down and slides back when you scroll up; the CTA slot holds the theme toggle.
 import React, { useState } from "react";
 import { motion, useScroll, useMotionValueEvent } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export const FloatingNav = ({
+  brand,
   navItems,
   action,
   className,
 }: {
-  navItems: { name: string; link: string; icon?: React.ReactNode }[];
+  brand: React.ReactNode;
+  navItems: { name: string; link: string; hideOnMobile?: boolean }[];
   action?: React.ReactNode;
   className?: string;
 }) => {
   const { scrollY } = useScroll();
   const [visible, setVisible] = useState(true);
+  const [atTop, setAtTop] = useState(true);
 
   useMotionValueEvent(scrollY, "change", (current) => {
     const previous = scrollY.getPrevious() ?? 0;
+    setAtTop(current < 40);
     if (current < 120) setVisible(true);
     else setVisible(current < previous);
   });
@@ -27,36 +31,34 @@ export const FloatingNav = ({
   return (
     <motion.nav
       aria-label="Main"
-      initial={{ opacity: 0, y: -100 }}
-      animate={{ y: visible ? 0 : -100, opacity: visible ? 1 : 0 }}
-      transition={{ duration: 0.25 }}
+      initial={{ y: -80 }}
+      animate={{ y: visible ? 0 : -80 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={cn(
-        "fixed inset-x-0 top-4 z-[5000] mx-auto flex max-w-fit items-center justify-center",
+        "fixed inset-x-0 top-0 z-[5000] border-b transition-colors duration-300",
+        atTop ? "border-transparent" : "border-border bg-background/90 backdrop-blur-sm",
         className,
       )}
     >
-      <div className="flex items-center justify-center gap-1 rounded-full border border-border bg-background/70 px-2 py-1.5 shadow-lg shadow-black/10 backdrop-blur-md sm:gap-2">
-        <a
-          href="#home"
-          className="hidden rounded-full px-3 py-2 font-serif text-lg italic text-foreground md:block"
-        >
-          Aari
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:h-16 md:px-6">
+        <a href="#home" className="font-serif text-xl leading-none whitespace-nowrap md:text-2xl">
+          {brand}
         </a>
-        <div className="flex items-center gap-0.5 sm:gap-1">
-          {navItems.map((navItem) => (
-            <a
-              key={navItem.link}
-              href={navItem.link}
-              aria-label={navItem.name}
-              className="relative flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-foreground/5 hover:text-foreground sm:px-4"
-            >
-              <span className="block sm:hidden">{navItem.icon}</span>
-              <span className="hidden sm:block">{navItem.name}</span>
-            </a>
-          ))}
+        <div className="flex items-center gap-3 sm:gap-6">
+          <ul className="flex items-center gap-3 text-[13px] sm:gap-6 sm:text-sm">
+            {navItems.map((item) => (
+              <li key={item.link} className={cn(item.hideOnMobile && "hidden sm:block")}>
+                <a
+                  href={item.link}
+                  className="text-foreground/70 transition-colors hover:text-accent"
+                >
+                  {item.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+          {action}
         </div>
-        <div className="h-5 w-px bg-border" />
-        {action}
       </div>
     </motion.nav>
   );

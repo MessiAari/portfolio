@@ -1,7 +1,7 @@
 "use client";
 // Aceternity UI — Infinite Moving Cards (https://ui.aceternity.com/components/infinite-moving-cards)
-// Adapted: renders skill chips instead of quotes, and duplicates the list in
-// React (instead of cloning DOM nodes) so the loop is seamless.
+// Adapted: a typographic ticker (words with separators) instead of quote cards,
+// and the list is duplicated in React (instead of cloning DOM nodes) for a seamless loop.
 import { cn } from "@/lib/utils";
 
 export const InfiniteMovingCards = ({
@@ -10,21 +10,20 @@ export const InfiniteMovingCards = ({
   speed = "normal",
   pauseOnHover = true,
   className,
+  itemClassName,
 }: {
   items: string[];
   direction?: "left" | "right";
   speed?: "fast" | "normal" | "slow";
   pauseOnHover?: boolean;
   className?: string;
+  itemClassName?: string;
 }) => {
-  const duration = speed === "fast" ? "20s" : speed === "normal" ? "40s" : "80s";
+  const duration = speed === "fast" ? "30s" : speed === "normal" ? "60s" : "110s";
 
   return (
     <div
-      className={cn(
-        "relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_15%,white_85%,transparent)]",
-        className,
-      )}
+      className={cn("relative overflow-hidden", className)}
       style={
         {
           "--animation-duration": duration,
@@ -34,7 +33,7 @@ export const InfiniteMovingCards = ({
     >
       <ul
         className={cn(
-          "animate-scroll flex w-max min-w-full shrink-0 flex-nowrap gap-4 py-2",
+          "animate-scroll flex w-max min-w-full shrink-0 flex-nowrap gap-6",
           pauseOnHover && "hover:[animation-play-state:paused]",
         )}
       >
@@ -42,9 +41,10 @@ export const InfiniteMovingCards = ({
           <li
             key={item + idx}
             aria-hidden={idx >= items.length}
-            className="shrink-0 rounded-full border border-border bg-card px-5 py-2.5 font-mono text-sm whitespace-nowrap text-foreground/80 shadow-sm"
+            className={cn("flex shrink-0 items-center gap-6 whitespace-nowrap", itemClassName)}
           >
             {item}
+            <span className="text-[0.5em] text-accent">✱</span>
           </li>
         ))}
       </ul>

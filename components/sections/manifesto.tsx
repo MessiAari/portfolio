@@ -6,7 +6,7 @@ import { ScrollAssembleText } from "@/components/ui/scroll-assemble-text";
 import { profile } from "@/lib/portfolio-data";
 
 /**
- * A pinned interlude between the hero and About: the three verbs from Aari's
+ * A pinned interlude between the hero and About: the three verbs from Aaritra's
  * intro assemble letter by letter, one after another, as you scroll.
  */
 export function Manifesto() {

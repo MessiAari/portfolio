@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { IconArrowUp, IconMessageCircle, IconX } from "@tabler/icons-react";
-import { chatSuggestions, profile } from "@/lib/portfolio-data";
+import { IconX } from "@tabler/icons-react";
+import { assistant, chatSuggestions, profile } from "@/lib/portfolio-data";
 import { cn } from "@/lib/utils";
 
 type ChatMessage = { role: "user" | "assistant"; content: string; isError?: boolean };
@@ -24,8 +23,8 @@ export function openChat() {
  * 3. app/api/chat/route.ts adds the system prompt built from portfolio-data.ts
  *    and calls Gemini with GEMINI_API_KEY, which only exists on the server
  *    (Vercel environment variable) and is never sent to the browser.
- * 4. The reply comes back as JSON and is shown as a chat bubble. Any failure
- *    (network, missing key, 429 quota) shows a friendly error bubble instead.
+ * 4. The reply comes back as JSON and is shown in the panel. Any failure
+ *    (network, missing key, 429 quota) shows a friendly error message instead.
  */
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
@@ -66,7 +65,7 @@ export function ChatWidget() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Error bubbles are UI-only, so they are not sent back to the AI.
+        // Error messages are UI-only, so they are not sent back to the AI.
         body: JSON.stringify({
           messages: history
             .filter((m) => !m.isError)
@@ -91,16 +90,16 @@ export function ChatWidget() {
           <motion.button
             type="button"
             onClick={() => setOpen(true)}
-            initial={{ opacity: 0, scale: 0.6, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.6, y: 20 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label="Open chat with Aari's AI assistant"
-            className="fixed right-4 bottom-4 z-[6000] flex items-center gap-2 rounded-full bg-foreground py-3.5 pr-5 pl-4 text-sm font-medium text-background shadow-2xl shadow-black/30 sm:right-6 sm:bottom-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            aria-label={`Open chat with ${assistant.name}, ${profile.firstName}'s AI assistant`}
+            className="group fixed right-4 bottom-4 z-[6000] flex items-center gap-3 rounded-full border border-foreground bg-foreground py-2 pr-5 pl-2 text-background shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] transition-colors hover:bg-background hover:text-foreground sm:right-6 sm:bottom-6"
           >
-            <IconMessageCircle className="h-5 w-5" />
-            <span>Ask AI</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent font-serif text-lg text-background italic">
+              A
+            </span>
+            <span className="text-sm font-medium">Ask {assistant.name}</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -109,83 +108,93 @@ export function ChatWidget() {
         {open && (
           <motion.div
             role="dialog"
-            aria-label="Chat with Aari's AI assistant"
-            initial={{ opacity: 0, y: 30, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="fixed inset-x-2 bottom-2 z-[6000] flex h-[min(620px,calc(100svh-1rem))] origin-bottom-right flex-col overflow-hidden rounded-3xl border border-border bg-background shadow-2xl shadow-black/40 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[400px]"
+            aria-label={`Chat with ${assistant.name}`}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-x-2 bottom-2 z-[6000] flex h-[min(620px,calc(100svh-1rem))] flex-col overflow-hidden rounded-lg border border-foreground/25 bg-background shadow-[0_24px_60px_-20px_rgb(0_0_0/0.55)] sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[400px]"
           >
-            <header className="flex items-center gap-3 border-b border-border px-4 py-3">
-              <Image
-                src={profile.photo}
-                alt=""
-                width={40}
-                height={40}
-                className="h-10 w-10 rounded-full object-cover object-top"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold">Aari&apos;s AI assistant</p>
-                <p className="truncate text-xs text-muted">Answers from this portfolio · Gemini</p>
+            <header className="flex items-start justify-between gap-3 border-b border-border px-5 pt-4 pb-3">
+              <div>
+                <p className="font-serif text-3xl leading-none">{assistant.name}</p>
+                <p className="mt-1.5 font-mono text-[10px] tracking-[0.14em] text-muted uppercase">
+                  {assistant.tagline} · Gemini
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close chat"
-                className="rounded-full p-2 text-muted hover:bg-foreground/10 hover:text-foreground"
+                className="-mr-1 p-1 text-muted hover:text-foreground"
               >
-                <IconX className="h-5 w-5" />
+                <IconX className="h-5 w-5" stroke={1.5} />
               </button>
             </header>
 
-            <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4">
+            <div ref={listRef} className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5">
               {messages.length === 0 && (
-                <div className="py-4 text-center">
-                  <p className="font-serif text-2xl italic">Hi! 👋</p>
-                  <p className="mx-auto mt-2 max-w-xs text-sm text-muted">
-                    Ask me anything about {profile.nickname}&apos;s skills, projects or how to get in
-                    touch.
+                <div>
+                  <p className="font-serif text-2xl leading-snug">
+                    Ask me about {profile.firstName}&apos;s skills, projects, or how to get in touch.
                   </p>
-                  <div className="mt-6 flex flex-col items-center gap-2">
+                  <p className="mt-6 font-mono text-[10px] tracking-[0.14em] text-muted uppercase">
+                    Try asking
+                  </p>
+                  <ul className="mt-2 border-b border-border">
                     {chatSuggestions.map((q) => (
-                      <button
-                        key={q}
-                        type="button"
-                        onClick={() => send(q)}
-                        className="rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground/85 transition-colors hover:border-accent/50 hover:text-foreground"
-                      >
-                        {q}
-                      </button>
+                      <li key={q}>
+                        <button
+                          type="button"
+                          onClick={() => send(q)}
+                          className="group flex w-full items-center justify-between gap-3 border-t border-border py-3 text-left text-[15px] transition-colors hover:text-accent"
+                        >
+                          {q}
+                          <span className="text-muted transition group-hover:translate-x-1 group-hover:text-accent">
+                            →
+                          </span>
+                        </button>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               )}
 
-              {messages.map((m, i) => (
-                <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-                  <div
-                    className={cn(
-                      "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed break-words whitespace-pre-wrap",
-                      m.role === "user"
-                        ? "rounded-br-md bg-foreground text-background"
-                        : m.isError
-                          ? "rounded-bl-md border border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-300"
-                          : "rounded-bl-md border border-border bg-card text-foreground",
-                    )}
-                  >
-                    {m.role === "assistant" ? <Linkified text={m.content} /> : m.content}
+              {messages.map((m, i) =>
+                m.role === "user" ? (
+                  <div key={i} className="flex justify-end">
+                    <p className="max-w-[85%] rounded-md bg-foreground px-3.5 py-2 text-[15px] break-words whitespace-pre-wrap text-background">
+                      {m.content}
+                    </p>
                   </div>
-                </div>
-              ))}
+                ) : (
+                  <div key={i} className="border-l-2 border-accent pl-3.5">
+                    <p className="font-mono text-[10px] tracking-[0.14em] text-muted uppercase">
+                      {assistant.name}
+                    </p>
+                    <p
+                      className={cn(
+                        "mt-1 text-[15px] leading-relaxed break-words whitespace-pre-wrap",
+                        m.isError && "text-accent",
+                      )}
+                    >
+                      <RichText text={m.content} />
+                    </p>
+                  </div>
+                ),
+              )}
 
               {loading && (
-                <div className="flex justify-start" aria-label="Assistant is typing">
-                  <div className="flex gap-1 rounded-2xl rounded-bl-md border border-border bg-card px-4 py-3.5">
+                <div className="border-l-2 border-accent pl-3.5" aria-label={`${assistant.name} is typing`}>
+                  <p className="font-mono text-[10px] tracking-[0.14em] text-muted uppercase">
+                    {assistant.name}
+                  </p>
+                  <div className="mt-2 flex gap-1">
                     {[0, 1, 2].map((d) => (
                       <motion.span
                         key={d}
-                        className="h-1.5 w-1.5 rounded-full bg-muted"
-                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        className="h-1.5 w-1.5 rounded-full bg-foreground/50"
+                        animate={{ opacity: [0.2, 1, 0.2] }}
                         transition={{ duration: 1, repeat: Infinity, delay: d * 0.2 }}
                       />
                     ))}
@@ -199,7 +208,7 @@ export function ChatWidget() {
                 e.preventDefault();
                 send(input);
               }}
-              className="flex items-center gap-2 border-t border-border p-3"
+              className="flex items-center gap-3 border-t border-border px-5 py-3"
             >
               <label htmlFor="chat-input" className="sr-only">
                 Your question
@@ -209,18 +218,17 @@ export function ChatWidget() {
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about skills, projects…"
+                placeholder="Type a question…"
                 maxLength={500}
                 autoComplete="off"
-                className="min-w-0 flex-1 rounded-full border border-border bg-card px-4 py-2.5 text-base text-foreground outline-none placeholder:text-muted/70 focus:border-accent/60 sm:text-sm"
+                className="min-w-0 flex-1 bg-transparent py-2 text-base text-foreground outline-none placeholder:text-muted/70 sm:text-[15px]"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || loading}
-                aria-label="Send"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition disabled:opacity-30"
+                className="font-mono text-[11px] tracking-[0.14em] uppercase transition hover:text-accent disabled:opacity-30"
               >
-                <IconArrowUp className="h-5 w-5" />
+                Send ↵
               </button>
             </form>
           </motion.div>
@@ -230,17 +238,24 @@ export function ChatWidget() {
   );
 }
 
-/** Turns URLs and email addresses in the AI's reply into clickable links. */
-function Linkified({ text }: { text: string }) {
-  const parts = text.split(/(https?:\/\/[^\s)]+|[\w.+-]+@[\w-]+\.[\w.]+)/g);
+/** Renders the AI's reply: links for URLs/emails and `inline code` spans. */
+function RichText({ text }: { text: string }) {
+  const parts = text.split(/(`[^`]+`|https?:\/\/[^\s)]+|[\w.+-]+@[\w-]+\.[\w.]+)/g);
   return (
     <>
       {parts.map((part, i) => {
+        if (/^`[^`]+`$/.test(part)) {
+          return (
+            <code key={i} className="rounded-sm bg-foreground/10 px-1 font-mono text-[0.85em]">
+              {part.slice(1, -1)}
+            </code>
+          );
+        }
         if (/^https?:\/\//.test(part)) {
           const url = part.replace(/[.,]+$/, "");
           return (
             <span key={i}>
-              <a href={url} target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-2">
+              <a href={url} target="_blank" rel="noopener noreferrer" className="link text-accent">
                 {url}
               </a>
               {part.slice(url.length)}
@@ -251,7 +266,7 @@ function Linkified({ text }: { text: string }) {
           const email = part.replace(/[.]+$/, "");
           return (
             <span key={i}>
-              <a href={`mailto:${email}`} className="text-accent underline underline-offset-2">
+              <a href={`mailto:${email}`} className="link text-accent">
                 {email}
               </a>
               {part.slice(email.length)}

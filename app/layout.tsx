@@ -29,7 +29,7 @@ const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: `${profile.name} (${profile.nickname}) · Portfolio`,
+  title: `${profile.name} · Portfolio`,
   description: `${profile.name}, ${profile.degree} student at ${profile.university}. ${profile.taglines.join(" ")}`,
   openGraph: {
     title: `${profile.name} · Portfolio`,
@@ -40,8 +40,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#060608" },
-    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+    { media: "(prefers-color-scheme: dark)", color: "#181614" },
+    { media: "(prefers-color-scheme: light)", color: "#f1eadc" },
   ],
 };
 

@@ -39,7 +39,7 @@ export const CardSpotlight = ({
           maskImage,
           WebkitMaskImage: maskImage,
           background:
-            "radial-gradient(circle at 30% 20%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%), radial-gradient(circle at 80% 80%, color-mix(in oklab, var(--accent-2) 22%, transparent), transparent 60%)",
+            "color-mix(in oklab, var(--accent) 9%, transparent)",
         }}
       />
       <div className="relative z-10">{children}</div>

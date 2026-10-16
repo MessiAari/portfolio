@@ -3,25 +3,25 @@
 /* Dark mode is driven by a `.dark` class on <html> (set by the theme toggle). */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Light theme: cream paper + warm ink */
 :root {
-  --background: #fafafa;
-  --foreground: #0a0a0b;
-  --muted: #52525b;
-  --card: #ffffff;
-  --border: rgb(10 10 11 / 0.1);
-  --accent: #0284c7;
-  --accent-2: #7c3aed;
+  --background: #f1eadc;
+  --foreground: #1c1a17;
+  --muted: #6b6357;
+  --card: #e9e0cd;
+  --border: rgb(28 26 23 / 0.16);
+  --accent: #b23a15;
   color-scheme: light;
 }
 
+/* Dark theme: warm charcoal + cream ink */
 .dark {
-  --background: #060608;
-  --foreground: #f4f4f5;
-  --muted: #a1a1aa;
-  --card: #0e0e12;
-  --border: rgb(255 255 255 / 0.09);
-  --accent: #38bdf8;
-  --accent-2: #a78bfa;
+  --background: #181614;
+  --foreground: #ede5d6;
+  --muted: #a09789;
+  --card: #211e1b;
+  --border: rgb(237 229 214 / 0.13);
+  --accent: #e8835a;
   color-scheme: dark;
 }
 
@@ -32,7 +32,6 @@
   --color-card: var(--card);
   --color-border: var(--border);
   --color-accent: var(--accent);
-  --color-accent-2: var(--accent-2);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-instrument-serif);
@@ -42,14 +41,14 @@
 
   @keyframes scroll {
     to {
-      transform: translate(calc(-50% - 0.5rem));
+      transform: translate(calc(-50% - 0.75rem));
     }
   }
 }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 4.5rem;
 }
 
 body {
@@ -57,24 +56,41 @@ body {
   color: var(--foreground);
   /* `clip` (not `hidden`) prevents horizontal scroll without breaking position: sticky */
   overflow-x: clip;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Faint paper grain over the whole page */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.dark body::after {
+  opacity: 0.035;
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--accent) 35%, transparent);
+  background: var(--accent);
+  color: var(--background);
 }
 
-.text-gradient {
-  background: linear-gradient(110deg, var(--foreground) 20%, var(--accent) 60%, var(--accent-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* Text link with an underline that redraws on hover */
+.link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 100% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.35s ease;
+  padding-bottom: 2px;
 }
-
-.bg-grid {
-  background-image:
-    linear-gradient(to right, var(--border) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-  background-size: 56px 56px;
+.link:hover {
+  background-size: 0% 1px;
+  background-position: 100% 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
