@@ -51,7 +51,8 @@ export function About() {
                     alt={`Portrait of ${profile.name}`}
                     fill
                     sizes="(max-width: 1024px) 90vw, 400px"
-                    className="object-cover"
+                    // the photo is a tall portrait; keep the face in frame
+                    className="object-cover object-[50%_32%]"
                   />
                 </motion.div>
               </motion.div>
