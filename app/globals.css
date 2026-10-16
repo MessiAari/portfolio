@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* Dark mode is driven by a `.dark` class on <html> (set by the theme toggle). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #fafafa;
+  --foreground: #0a0a0b;
+  --muted: #52525b;
+  --card: #ffffff;
+  --border: rgb(10 10 11 / 0.1);
+  --accent: #0284c7;
+  --accent-2: #7c3aed;
+  color-scheme: light;
+}
+
+.dark {
+  --background: #060608;
+  --foreground: #f4f4f5;
+  --muted: #a1a1aa;
+  --card: #0e0e12;
+  --border: rgb(255 255 255 / 0.09);
+  --accent: #38bdf8;
+  --accent-2: #a78bfa;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-instrument-serif);
+
+  --animate-scroll: scroll var(--animation-duration, 40s) var(--animation-direction, forwards)
+    linear infinite;
+
+  @keyframes scroll {
+    to {
+      transform: translate(calc(-50% - 0.5rem));
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  /* `clip` (not `hidden`) prevents horizontal scroll without breaking position: sticky */
+  overflow-x: clip;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 35%, transparent);
+}
+
+.text-gradient {
+  background: linear-gradient(110deg, var(--foreground) 20%, var(--accent) 60%, var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
