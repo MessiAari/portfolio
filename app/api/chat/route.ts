@@ -4,7 +4,7 @@ import { buildSystemPrompt } from "@/lib/portfolio-data";
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 // Tried in order: if one model's free quota is used up (429), the next one is used.
-const MODELS = ["gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"];
+const MODELS = ["gemini-3.1-flash-lite", "gemini-3-flash-preview", "gemini-2.5-flash"];
 const MAX_MESSAGES = 12; // only the most recent turns are sent to Gemini
 const MAX_CHARS = 1000; // per message
 const MAX_RETRY_WAIT = 8; // seconds we're willing to wait after a 429
@@ -85,8 +85,11 @@ export async function POST(request: Request) {
         break;
       } catch (error) {
         lastError = error;
-        // Not a quota error (e.g. bad request): stop trying other models.
-        if ((error as { status?: number }).status !== 429) throw error;
+        const status = (error as { status?: number }).status;
+        // 404 = model not available on this key: skip to the next model.
+        if (status === 404) continue;
+        // Any other non-quota error (e.g. bad request): stop trying other models.
+        if (status !== 429) throw error;
         // Gemini sometimes says "retry in a few seconds": wait once, then retry this model.
         const delay = retryDelaySeconds(error);
         if (delay !== null && delay <= MAX_RETRY_WAIT) {

@@ -12,7 +12,7 @@ A scroll-driven personal portfolio for **Aaritra Kumar**, B.Tech CSE student at 
 - **motion** (`motion/react`) for scroll-linked and entrance animations
 - **Aceternity UI** components: Flip Words, Text Generate Effect, Floating Navbar, Card Spotlight, Infinite Moving Cards, Timeline (restyled to match the site)
 - **Skiper UI** (free) components: Text Scroll animation (skiper31), Card stack scroll (skiper16, as inspiration), Theme toggle button (skiper4)
-- **Google Gemini API** (`@google/genai`, models `gemini-2.5-flash-lite` → `gemini-2.0-flash` → `gemini-2.5-flash`, with automatic fallback on quota errors) for the chatbot
+- **Google Gemini API** (`@google/genai`, models `gemini-3.1-flash-lite` → `gemini-3-flash-preview` → `gemini-2.5-flash`, with automatic fallback on quota errors) for the chatbot
 - **Vercel** for hosting
 
 ## Implemented features
