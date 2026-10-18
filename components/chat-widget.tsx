@@ -1,15 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { IconX } from "@tabler/icons-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { assistant, chatSuggestions, profile } from "@/lib/portfolio-data";
 import { cn } from "@/lib/utils";
 
-type ChatMessage = { role: "user" | "assistant"; content: string; isError?: boolean };
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+  isError?: boolean;
+  /** true while a new reply is still being typed out */
+  typing?: boolean;
+};
 
 const ERROR_MESSAGE = "Sorry, I couldn't reach the AI right now. Please try again in a moment.";
 const OPEN_EVENT = "open-chat";
+const PROMPT_USER = "aaritra@portfolio";
+// Input is 16px on phones (so iOS doesn't zoom in) and 13px on larger screens.
+const INPUT_TEXT = "text-base sm:text-[13px]";
 
 /** Lets any button on the page open the chat panel. */
 export function openChat() {
@@ -23,8 +31,8 @@ export function openChat() {
  * 3. app/api/chat/route.ts adds the system prompt built from portfolio-data.ts
  *    and calls Gemini with GEMINI_API_KEY, which only exists on the server
  *    (Vercel environment variable) and is never sent to the browser.
- * 4. The reply comes back as JSON and is shown in the panel. Any failure
- *    (network, missing key, 429 quota) shows a friendly error message instead.
+ * 4. The reply comes back as JSON and is typed out in the terminal. Any failure
+ *    (network, missing key, 429 quota) prints a friendly error line instead.
  */
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
@@ -33,6 +41,13 @@ export function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  // How many characters fit in the input before it starts scrolling sideways.
+  const [capacity, setCapacity] = useState(Infinity);
+
+  const scrollToBottom = useCallback(() => {
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
+  }, []);
 
   useEffect(() => {
     const handleOpen = () => setOpen(true);
@@ -48,24 +63,42 @@ export function ChatWidget() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // Measure the input so the block cursor is only drawn while the text fits.
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, loading]);
+    if (!open || !inputRef.current) return;
+    const observer = new ResizeObserver(() => {
+      const charWidth = measureRef.current?.getBoundingClientRect().width;
+      const width = inputRef.current?.clientWidth;
+      if (charWidth && width) setCapacity(Math.floor(width / charWidth) - 1);
+    });
+    observer.observe(inputRef.current);
+    return () => observer.disconnect();
+  }, [open]);
+
+  useEffect(scrollToBottom, [messages.length, loading, scrollToBottom]);
+
+  const isTyping = messages.some((m) => m.typing);
 
   async function send(text: string) {
     const question = text.trim();
-    if (!question || loading) return;
+    if (!question || loading || isTyping) return;
+    setInput("");
+
+    // A little terminal touch: `clear` wipes the screen without calling the AI.
+    if (question.toLowerCase() === "clear") {
+      setMessages([]);
+      return;
+    }
 
     const history: ChatMessage[] = [...messages, { role: "user", content: question }];
     setMessages(history);
-    setInput("");
     setLoading(true);
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Error messages are UI-only, so they are not sent back to the AI.
+        // Error lines are UI-only, so they are not sent back to the AI.
         body: JSON.stringify({
           messages: history
             .filter((m) => !m.isError)
@@ -74,14 +107,23 @@ export function ChatWidget() {
       });
       const data = (await res.json().catch(() => null)) as { reply?: string } | null;
       if (!res.ok || !data?.reply) throw new Error(`Chat request failed (${res.status})`);
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply! }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply!, typing: true }]);
     } catch (error) {
       console.warn(error);
-      setMessages((prev) => [...prev, { role: "assistant", content: ERROR_MESSAGE, isError: true }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: ERROR_MESSAGE, isError: true, typing: true },
+      ]);
     } finally {
       setLoading(false);
     }
   }
+
+  const finishTyping = useCallback((index: number) => {
+    setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, typing: false } : m)));
+  }, []);
+
+  const showBlockCursor = input.length < capacity;
 
   return (
     <>
@@ -94,12 +136,11 @@ export function ChatWidget() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             aria-label={`Open chat with ${assistant.name}, ${profile.firstName}'s AI assistant`}
-            className="group fixed right-4 bottom-4 z-[6000] flex items-center gap-3 rounded-full border border-foreground bg-foreground py-2 pr-5 pl-2 text-background shadow-[0_10px_30px_-10px_rgb(0_0_0/0.5)] transition-colors hover:bg-background hover:text-foreground sm:right-6 sm:bottom-6"
+            className="fixed right-4 bottom-4 z-[6000] flex items-center gap-2 rounded-md border border-foreground/70 bg-background px-4 py-2.5 font-mono text-[13px] text-foreground shadow-[0_10px_30px_-12px_rgb(0_0_0/0.45)] transition-colors hover:bg-foreground hover:text-background sm:right-6 sm:bottom-6"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent font-serif text-lg text-background italic">
-              A
-            </span>
-            <span className="text-sm font-medium">Ask {assistant.name}</span>
+            <span className="text-accent">&gt;_</span>
+            ask {assistant.name.toLowerCase()}
+            <span aria-hidden className="animate-blink">▍</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -113,127 +154,216 @@ export function ChatWidget() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-x-2 bottom-2 z-[6000] flex h-[min(620px,calc(100svh-1rem))] flex-col overflow-hidden rounded-lg border border-foreground/25 bg-background shadow-[0_24px_60px_-20px_rgb(0_0_0/0.55)] sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[400px]"
+            // Clicking anywhere focuses the prompt, unless the visitor is selecting text to copy.
+            onClick={() => {
+              if (!window.getSelection()?.toString()) inputRef.current?.focus();
+            }}
+            className="fixed inset-x-2 bottom-2 z-[6000] flex h-[min(620px,calc(100svh-1rem))] flex-col overflow-hidden rounded-lg border border-foreground/25 bg-background font-mono shadow-[0_24px_60px_-20px_rgb(0_0_0/0.55)] sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[440px]"
           >
-            <header className="flex items-start justify-between gap-3 border-b border-border px-5 pt-4 pb-3">
-              <div>
-                <p className="font-serif text-3xl leading-none">{assistant.name}</p>
-                <p className="mt-1.5 font-mono text-[10px] tracking-[0.14em] text-muted uppercase">
-                  {assistant.tagline} · Gemini
-                </p>
-              </div>
+            {/* Title bar */}
+            <header className="flex items-center gap-3 border-b border-border bg-card px-3 py-2 text-[11px] text-muted">
+              <span aria-hidden className="flex gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full border border-foreground/30" />
+                <span className="h-2.5 w-2.5 rounded-full border border-foreground/30" />
+                <span className="h-2.5 w-2.5 rounded-full bg-accent" />
+              </span>
+              <p className="flex-1 truncate text-center">
+                {assistant.name.toLowerCase()} — {PROMPT_USER}: ~
+              </p>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close chat"
-                className="-mr-1 p-1 text-muted hover:text-foreground"
+                className="px-1 hover:text-accent"
               >
-                <IconX className="h-5 w-5" stroke={1.5} />
+                [x]
               </button>
             </header>
 
-            <div ref={listRef} className="flex-1 space-y-5 overflow-y-auto overscroll-contain px-5 py-5">
+            {/* Scrollback */}
+            <div
+              ref={listRef}
+              aria-live="polite"
+              className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4 text-[13px] leading-relaxed"
+            >
+              <div className="space-y-1 text-muted">
+                <p>
+                  {assistant.name} v1.0 · {assistant.tagline} · powered by Gemini
+                </p>
+                <p>Ask anything, run a suggestion below, or type &quot;clear&quot;.</p>
+              </div>
+
               {messages.length === 0 && (
-                <div>
-                  <p className="font-serif text-2xl leading-snug">
-                    Ask me about {profile.firstName}&apos;s skills, projects, or how to get in touch.
-                  </p>
-                  <p className="mt-6 font-mono text-[10px] tracking-[0.14em] text-muted uppercase">
-                    Try asking
-                  </p>
-                  <ul className="mt-2 border-b border-border">
-                    {chatSuggestions.map((q) => (
-                      <li key={q}>
-                        <button
-                          type="button"
-                          onClick={() => send(q)}
-                          className="group flex w-full items-center justify-between gap-3 border-t border-border py-3 text-left text-[15px] transition-colors hover:text-accent"
-                        >
-                          {q}
-                          <span className="text-muted transition group-hover:translate-x-1 group-hover:text-accent">
-                            →
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <ul className="space-y-1 pt-1">
+                  {chatSuggestions.map((q, i) => (
+                    <li key={q}>
+                      <button
+                        type="button"
+                        onClick={() => send(q)}
+                        className="group text-left hover:text-accent"
+                      >
+                        <span className="text-accent">[{i + 1}]</span>{" "}
+                        <span className="group-hover:underline group-hover:underline-offset-4">{q}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
 
               {messages.map((m, i) =>
                 m.role === "user" ? (
-                  <div key={i} className="flex justify-end">
-                    <p className="max-w-[85%] rounded-md bg-foreground px-3.5 py-2 text-[15px] break-words whitespace-pre-wrap text-background">
-                      {m.content}
-                    </p>
-                  </div>
+                  <p key={i} className="break-words">
+                    <PromptLabel /> <span className="text-foreground">{m.content}</span>
+                  </p>
                 ) : (
-                  <div key={i} className="border-l-2 border-accent pl-3.5">
-                    <p className="font-mono text-[10px] tracking-[0.14em] text-muted uppercase">
-                      {assistant.name}
-                    </p>
-                    <p
-                      className={cn(
-                        "mt-1 text-[15px] leading-relaxed break-words whitespace-pre-wrap",
-                        m.isError && "text-accent",
-                      )}
-                    >
-                      <RichText text={m.content} />
-                    </p>
+                  <div
+                    key={i}
+                    className={cn(
+                      "break-words whitespace-pre-wrap",
+                      m.isError ? "text-accent" : "text-foreground/90",
+                    )}
+                  >
+                    {m.isError && "! "}
+                    <TypedText
+                      text={m.content}
+                      animate={!!m.typing}
+                      onProgress={scrollToBottom}
+                      onDone={() => finishTyping(i)}
+                    />
                   </div>
                 ),
               )}
 
               {loading && (
-                <div className="border-l-2 border-accent pl-3.5" aria-label={`${assistant.name} is typing`}>
-                  <p className="font-mono text-[10px] tracking-[0.14em] text-muted uppercase">
-                    {assistant.name}
-                  </p>
-                  <div className="mt-2 flex gap-1">
-                    {[0, 1, 2].map((d) => (
-                      <motion.span
-                        key={d}
-                        className="h-1.5 w-1.5 rounded-full bg-foreground/50"
-                        animate={{ opacity: [0.2, 1, 0.2] }}
-                        transition={{ duration: 1, repeat: Infinity, delay: d * 0.2 }}
-                      />
-                    ))}
-                  </div>
-                </div>
+                <p className="text-muted">
+                  {assistant.name.toLowerCase()} is thinking
+                  <span aria-hidden className="ml-1 animate-blink text-foreground">▍</span>
+                </p>
               )}
             </div>
 
+            {/* Prompt line */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 send(input);
               }}
-              className="flex items-center gap-3 border-t border-border px-5 py-3"
+              className="grid grid-cols-[1fr_auto] items-center gap-x-2 gap-y-1 border-t border-border px-4 py-3 sm:flex"
             >
-              <label htmlFor="chat-input" className="sr-only">
-                Your question
+              <label htmlFor="chat-input" className="col-span-2 shrink-0 text-[13px] whitespace-nowrap">
+                <PromptLabel />
+                <span className="sr-only">Your question</span>
               </label>
-              <input
-                id="chat-input"
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type a question…"
-                maxLength={500}
-                autoComplete="off"
-                className="min-w-0 flex-1 bg-transparent py-2 text-base text-foreground outline-none placeholder:text-muted/70 sm:text-[15px]"
-              />
+              <div className="relative min-w-0 flex-1">
+                <input
+                  id="chat-input"
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  maxLength={500}
+                  autoComplete="off"
+                  spellCheck={false}
+                  className={cn(
+                    "w-full bg-transparent p-0 text-foreground outline-none",
+                    INPUT_TEXT,
+                    showBlockCursor && "caret-transparent",
+                  )}
+                />
+                {/* Blinking block cursor drawn right after the typed text */}
+                {showBlockCursor && !loading && !isTyping && (
+                  <span
+                    aria-hidden
+                    className={cn("pointer-events-none absolute inset-y-0 left-0 flex items-center whitespace-pre", INPUT_TEXT)}
+                  >
+                    <span className="invisible">{input}</span>
+                    <span className="animate-blink bg-foreground/80 text-transparent">_</span>
+                  </span>
+                )}
+                <span ref={measureRef} aria-hidden className={cn("invisible absolute whitespace-pre", INPUT_TEXT)}>
+                  0
+                </span>
+              </div>
               <button
                 type="submit"
-                disabled={!input.trim() || loading}
-                className="font-mono text-[11px] tracking-[0.14em] uppercase transition hover:text-accent disabled:opacity-30"
+                disabled={!input.trim() || loading || isTyping}
+                aria-label="Send"
+                className="shrink-0 text-[13px] text-muted transition hover:text-accent disabled:opacity-30"
               >
-                Send ↵
+                ↵
               </button>
             </form>
           </motion.div>
         )}
       </AnimatePresence>
+    </>
+  );
+}
+
+function PromptLabel() {
+  return (
+    <span aria-hidden>
+      <span className="text-accent">{PROMPT_USER}</span>
+      <span className="text-muted">:~$</span>
+    </span>
+  );
+}
+
+/**
+ * Types a reply out line by line: each line appears a few characters at a
+ * time, with a short pause before the next line starts.
+ */
+function TypedText({
+  text,
+  animate,
+  onProgress,
+  onDone,
+}: {
+  text: string;
+  animate: boolean;
+  onProgress: () => void;
+  onDone: () => void;
+}) {
+  const reduce = useReducedMotion();
+  const instant = !animate || !!reduce;
+  const [shown, setShown] = useState(instant ? text.length : 0);
+  const callbacks = useRef({ onProgress, onDone });
+  useEffect(() => {
+    callbacks.current = { onProgress, onDone };
+  });
+
+  useEffect(() => {
+    if (instant) {
+      if (animate) callbacks.current.onDone();
+      return;
+    }
+    let pos = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      if (pos >= text.length) {
+        callbacks.current.onDone();
+        return;
+      }
+      const newline = text.indexOf("\n", pos);
+      const lineEnd = newline === -1 ? text.length : newline;
+      pos = Math.min(pos + 3, lineEnd);
+      let delay = 14;
+      if (pos === lineEnd && newline !== -1) {
+        pos = lineEnd + 1; // move to the next line, then pause briefly
+        delay = 140;
+      }
+      setShown(pos);
+      callbacks.current.onProgress();
+      timer = setTimeout(tick, delay);
+    };
+    timer = setTimeout(tick, 80);
+    return () => clearTimeout(timer);
+  }, [text, instant, animate]);
+
+  const done = shown >= text.length;
+  return (
+    <>
+      <RichText text={text.slice(0, shown)} />
+      {!done && <span aria-hidden className="animate-blink">▍</span>}
     </>
   );
 }
@@ -246,7 +376,7 @@ function RichText({ text }: { text: string }) {
       {parts.map((part, i) => {
         if (/^`[^`]+`$/.test(part)) {
           return (
-            <code key={i} className="rounded-sm bg-foreground/10 px-1 font-mono text-[0.85em]">
+            <code key={i} className="rounded-sm bg-foreground/10 px-1">
               {part.slice(1, -1)}
             </code>
           );
@@ -255,7 +385,7 @@ function RichText({ text }: { text: string }) {
           const url = part.replace(/[.,]+$/, "");
           return (
             <span key={i}>
-              <a href={url} target="_blank" rel="noopener noreferrer" className="link text-accent">
+              <a href={url} target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-4">
                 {url}
               </a>
               {part.slice(url.length)}
@@ -266,7 +396,7 @@ function RichText({ text }: { text: string }) {
           const email = part.replace(/[.]+$/, "");
           return (
             <span key={i}>
-              <a href={`mailto:${email}`} className="link text-accent">
+              <a href={`mailto:${email}`} className="text-accent underline underline-offset-4">
                 {email}
               </a>
               {part.slice(email.length)}

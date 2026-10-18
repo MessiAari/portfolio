@@ -26,7 +26,7 @@ A scroll-driven personal portfolio for **Aaritra Kumar**, B.Tech CSE student at 
 | **Projects** | 5 project cards (title, description, details, technologies, GitHub link, live link) that stack on top of each other while scrolling, plus **live search and tech filter chips** |
 | **Journey** | Timeline whose line fills in as you scroll |
 | **Contact** | Inverted (ink) block: email with copy button, GitHub, LinkedIn, location |
-| **AI Chatbot: Assist** | Floating "Ask Assist" button on every section → chat panel with suggested questions, typing indicator and friendly error handling. The name is a nod to the `MessiAari` handle (Messi, king of the assist) |
+| **AI Chatbot: Assist** | Floating `>_ ask assist` button on every section → a terminal-style chat (monospace, `aaritra@portfolio:~$` prompt, blinking block cursor, replies typed out line by line, `clear` command) with suggested questions and friendly error handling. Follows the light/dark theme. The name is a nod to the `MessiAari` handle (Messi, king of the assist) |
 
 Also:
 
