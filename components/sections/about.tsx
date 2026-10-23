@@ -1,99 +1,74 @@
 "use client";
 
-import { useRef } from "react";
-import Image from "next/image";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
-import { ScrollRevealText } from "@/components/ui/scroll-reveal-text";
-import { SectionHeading } from "@/components/section-heading";
+import { motion } from "motion/react";
+import { BinaryHeading } from "@/components/binary-heading";
+import { ScrollDecodeText } from "@/components/ui/scroll-decode-text";
 import { profile } from "@/lib/portfolio-data";
 
-const facts = [
-  { label: "Studying", value: `${profile.degree}, ${profile.university}` },
-  { label: "Batch", value: `${profile.batch} · Roll no. ${profile.roll}` },
-  { label: "Based in", value: profile.location },
-  { label: "Email", value: profile.email, href: `mailto:${profile.email}` },
+// The facts as a little JSON file. `href` makes a value clickable.
+const facts: { key: string; value: string; href?: string }[] = [
+  { key: "name", value: profile.name },
+  { key: "studying", value: profile.degree },
+  { key: "university", value: profile.university },
+  { key: "batch", value: profile.batch },
+  { key: "roll", value: profile.roll },
+  { key: "location", value: profile.location },
+  { key: "email", value: profile.email, href: `mailto:${profile.email}` },
+  { key: "github", value: `github.com/${profile.githubHandle}`, href: profile.github },
 ];
 
 export function About() {
-  const ref = useRef<HTMLElement>(null);
-  const reduce = useReducedMotion();
-
-  // Parallax: the photo moves slower than the page inside its frame,
-  // and the frame itself opens up from a narrow slit as it enters.
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const photoY = useTransform(scrollYProgress, [0, 1], reduce ? ["0%", "0%"] : ["-10%", "10%"]);
-  const clip = useTransform(
-    scrollYProgress,
-    [0.05, 0.35],
-    reduce ? ["inset(0% 0% 0% 0%)", "inset(0% 0% 0% 0%)"] : ["inset(18% 12% 18% 12%)", "inset(0% 0% 0% 0%)"],
-  );
-
   return (
-    <section
-      id="about"
-      ref={ref}
-      className="relative z-10 bg-background px-4 pt-24 pb-24 md:px-6 md:pt-32 md:pb-36"
-    >
+    <section id="about" className="relative z-10 bg-background px-5 py-24 md:px-8 md:py-36">
       <div className="mx-auto max-w-6xl">
-        <SectionHeading index="01" label="About" title={<>Hello, I&apos;m {profile.firstName}.</>} />
+        <BinaryHeading index={1} title="About" />
 
-        <div className="mt-14 grid gap-12 md:grid-cols-[200px_1fr] md:gap-8">
-          <div className="hidden md:block" />
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
-            <figure className="mx-auto w-full max-w-sm lg:max-w-none">
-              <motion.div
-                style={{ clipPath: clip }}
-                className="relative aspect-[4/5] overflow-hidden bg-card"
-              >
-                <motion.div style={{ y: photoY }} className="absolute -inset-y-[12%] inset-x-0">
-                  <Image
-                    src={profile.photo}
-                    alt={`Portrait of ${profile.name}`}
-                    fill
-                    sizes="(max-width: 1024px) 90vw, 400px"
-                    // the photo is a tall portrait; keep the face in frame
-                    className="object-cover object-[50%_32%]"
-                  />
-                </motion.div>
-              </motion.div>
-              <figcaption className="mt-3 flex justify-between font-mono text-[11px] tracking-[0.14em] text-muted uppercase">
-                <span>Fig. 01</span>
-                <span>{profile.name}, Jaipur</span>
-              </figcaption>
-            </figure>
+        <div className="mt-14 grid gap-12 md:ml-[220px] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:gap-14">
+          {/* The intro decodes word by word as you scroll */}
+          <ScrollDecodeText
+            text={profile.intro}
+            className="text-2xl leading-snug font-medium tracking-tight md:text-[1.9rem]"
+          />
 
-            <div>
-              <ScrollRevealText
-                text={profile.intro}
-                className="font-serif text-[1.7rem] leading-[1.2] tracking-[-0.01em] md:text-[2.1rem]"
-              />
-              <dl className="mt-12 border-b border-border">
-                {facts.map((fact, i) => (
-                  <motion.div
-                    key={fact.label}
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ delay: i * 0.07, duration: 0.5 }}
-                    className="grid gap-1 border-t border-border py-4 sm:grid-cols-[120px_1fr] sm:gap-4"
+          <motion.figure
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="self-start overflow-hidden rounded-2xl border border-border bg-card/60"
+          >
+            <figcaption className="flex items-center justify-between border-b border-border px-4 py-2.5 font-mono text-[11px] text-muted">
+              <span>profile.json</span>
+              <span>{facts.length} keys</span>
+            </figcaption>
+            <pre className="overflow-x-auto px-5 py-4 font-mono text-[13px] leading-7">
+              <code>
+                <span className="block text-muted">{"{"}</span>
+                {facts.map((f, i) => (
+                  <motion.span
+                    key={f.key}
+                    initial={{ opacity: 0, x: -8 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.25 + i * 0.09, duration: 0.35 }}
+                    className="block pl-4 whitespace-pre-wrap [overflow-wrap:anywhere]"
                   >
-                    <dt className="font-mono text-[11px] tracking-[0.14em] text-muted uppercase sm:pt-1">
-                      {fact.label}
-                    </dt>
-                    <dd className="text-[15px] break-words">
-                      {fact.href ? (
-                        <a href={fact.href} className="link break-all">
-                          {fact.value}
-                        </a>
-                      ) : (
-                        fact.value
-                      )}
-                    </dd>
-                  </motion.div>
+                    <span className="text-foreground">&quot;{f.key}&quot;</span>
+                    <span className="text-muted">: </span>
+                    {f.href ? (
+                      <a href={f.href} className="text-accent underline-offset-4 hover:underline">
+                        &quot;{f.value}&quot;
+                      </a>
+                    ) : (
+                      <span className="text-accent">&quot;{f.value}&quot;</span>
+                    )}
+                    {i < facts.length - 1 && <span className="text-muted">,</span>}
+                  </motion.span>
                 ))}
-              </dl>
-            </div>
-          </div>
+                <span className="block text-muted">{"}"}</span>
+              </code>
+            </pre>
+          </motion.figure>
         </div>
       </div>
     </section>

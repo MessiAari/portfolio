@@ -1,18 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
-import {
-  AnimatePresence,
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-  type MotionValue,
-} from "motion/react";
-import { IconSearch, IconX } from "@tabler/icons-react";
-import { CardSpotlight } from "@/components/ui/card-spotlight";
-import { SectionHeading } from "@/components/section-heading";
+import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { IconX } from "@tabler/icons-react";
+import { BinaryHeading } from "@/components/binary-heading";
+import { DecodeText } from "@/components/ui/decode-text";
 import { projects, projectTechs, type Project } from "@/lib/portfolio-data";
+import { bin, toBinary } from "@/lib/binary";
 import { cn } from "@/lib/utils";
 
 export function Projects() {
@@ -43,43 +37,40 @@ export function Projects() {
   };
 
   return (
-    <section id="projects" className="relative px-4 py-24 md:px-6 md:py-36">
+    <section id="projects" className="relative px-5 py-24 md:px-8 md:py-36">
       <div className="mx-auto max-w-6xl">
-        <SectionHeading
-          index="03"
-          label="Projects"
-          title="Selected work"
+        <BinaryHeading
+          index={3}
+          title="Projects"
           description="Five projects, from Python fundamentals to apps running in the browser. Search by name or technology, or pick a filter."
         />
 
-        <div className="mt-12 md:ml-[232px]">
-          <label className="relative block">
+        <div className="mt-12 md:ml-[220px]">
+          <label className="relative flex items-center gap-3 border-b border-foreground/40 pb-2 focus-within:border-accent">
             <span className="sr-only">Search projects by name or technology</span>
-            <IconSearch
-              stroke={1.5}
-              className="pointer-events-none absolute top-1/2 left-0 h-5 w-5 -translate-y-1/2 text-muted"
-            />
+            <span aria-hidden className="font-mono text-lg text-accent">
+              &gt;
+            </span>
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search: Python, Quiz, Book…"
-              className="w-full border-b border-foreground/40 bg-transparent py-3 pr-10 pl-8 font-serif text-2xl text-foreground outline-none placeholder:text-muted/60 focus:border-accent md:text-3xl [&::-webkit-search-cancel-button]:hidden"
+              placeholder="search: python, quiz, book…"
+              className="min-w-0 flex-1 bg-transparent font-mono text-lg text-foreground outline-none placeholder:text-muted/60 md:text-xl [&::-webkit-search-cancel-button]:hidden"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
                 aria-label="Clear search"
-                className="absolute top-1/2 right-0 -translate-y-1/2 p-1 text-muted hover:text-foreground"
+                className="p-1 text-muted hover:text-foreground"
               >
-                <IconX className="h-5 w-5" />
+                <IconX className="h-4 w-4" />
               </button>
             )}
           </label>
 
-          <div className="mt-5 flex flex-wrap items-center gap-2" role="group" aria-label="Filter by technology">
-            <span className="mr-1 font-mono text-[11px] tracking-[0.14em] text-muted uppercase">Filter</span>
+          <div className="mt-5 flex flex-wrap gap-1.5" role="group" aria-label="Filter by technology">
             {[null, ...projectTechs].map((tech) => {
               const active = activeTech === tech;
               return (
@@ -89,20 +80,21 @@ export function Projects() {
                   aria-pressed={active}
                   onClick={() => setActiveTech(tech)}
                   className={cn(
-                    "rounded-full border px-3 py-1 text-[13px] transition-colors",
+                    "rounded-full border px-3 py-1 font-mono text-[12px] transition-colors",
                     active
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-border text-foreground/70 hover:border-foreground/50 hover:text-foreground",
+                      ? "border-accent bg-accent text-background"
+                      : "border-border text-foreground/70 hover:border-foreground/40 hover:text-foreground",
                   )}
                 >
-                  {tech ?? "All"}
+                  {tech ?? "all"}
                 </button>
               );
             })}
           </div>
 
-          <p className="mt-4 font-mono text-[11px] tracking-[0.14em] text-muted uppercase" aria-live="polite">
-            {filteredProjects.length} of {projects.length} projects
+          <p className="mt-4 font-mono text-xs text-muted" aria-live="polite">
+            {bin(filteredProjects.length)}/{bin(projects.length)} · showing {filteredProjects.length} of {projects.length}{" "}
+            projects
           </p>
         </div>
 
@@ -110,29 +102,35 @@ export function Projects() {
           {filteredProjects.length === 0 ? (
             <motion.div
               key="empty"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="mt-12 border-y border-border py-16 text-center md:ml-[232px]"
+              className="mt-10 rounded-2xl border border-dashed border-border px-6 py-16 text-center md:ml-[220px]"
             >
-              <p className="font-serif text-4xl italic">Nothing here yet.</p>
-              <p className="mt-3 text-sm text-muted">
-                No projects match your search. Try &quot;Python&quot;, &quot;JavaScript&quot; or &quot;Book&quot;.
-              </p>
-              <button type="button" onClick={resetFilters} className="link mt-6 text-sm font-medium">
-                Show all projects
+              <p className="font-mono text-6xl font-bold text-accent">0</p>
+              <p className="mt-3 font-mono text-lg">No projects match your search.</p>
+              <p className="mt-1 text-sm text-muted">Try &quot;Python&quot;, &quot;JavaScript&quot; or &quot;Book&quot;.</p>
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="mt-6 rounded-full bg-foreground px-5 py-2 font-mono text-sm text-background"
+              >
+                show all projects
               </button>
             </motion.div>
           ) : (
-            <motion.div
+            <motion.ul
               key={`${search}|${activeTech}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
+              className="mt-10 grid gap-5 md:grid-cols-2"
             >
-              <ProjectStack projects={filteredProjects} />
-            </motion.div>
+              {filteredProjects.map((project, i) => (
+                <ProjectCard key={project.id} project={project} order={i} />
+              ))}
+            </motion.ul>
           )}
         </AnimatePresence>
       </div>
@@ -140,93 +138,71 @@ export function Projects() {
   );
 }
 
-/**
- * Stacking cards (in the style of Skiper UI's "Card stack scroll", skiper16):
- * every card is `position: sticky`, so as you scroll each new card slides over
- * the previous one, and the cards underneath shrink slightly to form a stack.
- */
-function ProjectStack({ projects }: { projects: Project[] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+function ProjectCard({ project, order }: { project: Project; order: number }) {
+  const number = projects.findIndex((p) => p.id === project.id) + 1;
+  // A faint field of the project's own name in binary, shown on hover.
+  const bits = toBinary(project.title).replace(/ /g, "").repeat(4);
 
   return (
-    <div ref={ref} className="mt-12 flex flex-col gap-[12svh] pb-[4svh]">
-      {projects.map((project, i) => (
-        <ProjectCard
-          key={project.id}
-          project={project}
-          index={i}
-          total={projects.length}
-          progress={scrollYProgress}
-        />
-      ))}
-    </div>
-  );
-}
+    <motion.li
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ delay: (order % 2) * 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card/60 p-6 transition-colors duration-300 hover:border-accent/60 md:p-8"
+    >
+      <p
+        aria-hidden
+        className="pointer-events-none absolute inset-0 font-mono text-[10px] leading-[1.1] break-all text-accent opacity-0 transition-opacity duration-500 select-none group-hover:opacity-[0.07]"
+      >
+        {bits}
+      </p>
 
-function ProjectCard({
-  project,
-  index,
-  total,
-  progress,
-}: {
-  project: Project;
-  index: number;
-  total: number;
-  progress: MotionValue<number>;
-}) {
-  const reduce = useReducedMotion();
-  const targetScale = 1 - (total - index - 1) * 0.035;
-  const scale = useTransform(progress, [index / total, 1], reduce ? [1, 1] : [1, targetScale]);
-  const number = String(projects.findIndex((p) => p.id === project.id) + 1).padStart(2, "0");
+      <div className="relative flex items-center gap-3 font-mono text-xs">
+        <span className="text-accent">{bin(number).padStart(3, "0")}</span>
+        <span className="text-muted">#{number}</span>
+        {project.live && (
+          <span className="ml-auto flex items-center gap-1.5 text-accent">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" /> live
+          </span>
+        )}
+      </div>
 
-  return (
-    <div className="sticky" style={{ top: `calc(4.5rem + ${index * 1.1}rem)` }}>
-      <motion.article style={{ scale }} className="origin-top">
-        <CardSpotlight className="rounded-md border border-border bg-card p-6 shadow-[0_-12px_40px_-20px_rgb(0_0_0/0.35)] sm:p-8 md:p-10">
-          <div className="flex items-baseline justify-between gap-4 border-b border-border pb-4">
-            <span className="font-serif text-4xl text-accent md:text-5xl">{number}</span>
-            <ul className="flex flex-wrap justify-end gap-x-3 gap-y-1 font-mono text-[11px] tracking-[0.1em] text-muted uppercase" aria-label="Technologies">
-              {project.tech.map((tech) => (
-                <li key={tech}>{tech}</li>
-              ))}
-            </ul>
-          </div>
+      <h3 className="relative mt-5 font-mono text-xl leading-snug font-semibold tracking-tight md:text-2xl">
+        <DecodeText text={project.title} trigger="inView" duration={0.9} delay={(order % 2) * 0.15} />
+      </h3>
+      <p className="relative mt-3 text-[15px] text-pretty text-foreground/75">{project.description}</p>
 
-          <div className="mt-6 grid gap-8 md:grid-cols-[1.15fr_1fr] md:gap-12">
-            <div className="flex flex-col">
-              <h3 className="font-serif text-[2rem] leading-[1.02] tracking-[-0.01em] text-balance md:text-5xl">
-                {project.title}
-              </h3>
-              <p className="mt-4 text-[15px] text-pretty text-foreground/75">{project.description}</p>
-              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium md:mt-auto md:pt-8">
-                <a href={project.repo} target="_blank" rel="noopener noreferrer" className="link">
-                  Code on GitHub ↗
-                </a>
-                {project.live && (
-                  <a
-                    href={project.live}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="link text-accent"
-                  >
-                    Live site ↗
-                  </a>
-                )}
-              </div>
-            </div>
+      <ul className="relative mt-5 space-y-2 text-sm text-foreground/80">
+        {project.highlights.map((point) => (
+          <li key={point} className="flex gap-2.5">
+            <span aria-hidden className="font-mono text-accent">
+              ›
+            </span>
+            <span>{point}</span>
+          </li>
+        ))}
+      </ul>
 
-            <ol className="space-y-3 text-sm text-foreground/80">
-              {project.highlights.map((point, i) => (
-                <li key={point} className="grid grid-cols-[1.75rem_1fr] border-t border-border pt-3">
-                  <span className="font-mono text-[11px] text-muted">{String(i + 1).padStart(2, "0")}</span>
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </CardSpotlight>
-      </motion.article>
-    </div>
+      <div className="relative mt-auto pt-7">
+        <ul className="flex flex-wrap gap-1.5" aria-label="Technologies">
+          {project.tech.map((tech) => (
+            <li key={tech} className="rounded-md bg-foreground/[0.07] px-2 py-0.5 font-mono text-[12px] text-foreground/80">
+              {tech}
+            </li>
+          ))}
+        </ul>
+        <div className="mt-5 flex flex-wrap gap-5 border-t border-border pt-4 font-mono text-sm">
+          <a href={project.repo} target="_blank" rel="noopener noreferrer" className="hover:text-accent">
+            github ↗
+          </a>
+          {project.live && (
+            <a href={project.live} target="_blank" rel="noopener noreferrer" className="text-accent hover:opacity-80">
+              live site ↗
+            </a>
+          )}
+        </div>
+      </div>
+    </motion.li>
   );
 }

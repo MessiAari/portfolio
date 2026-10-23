@@ -1,25 +1,25 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useState } from "react";
+import { motion } from "motion/react";
 import { openChat } from "@/components/chat-widget";
+import { DecodeText } from "@/components/ui/decode-text";
+import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 import { assistant, profile } from "@/lib/portfolio-data";
+import { bin, toBinary } from "@/lib/binary";
 
 const links = [
-  { label: "GitHub", value: `github.com/${profile.githubHandle}`, href: profile.github },
-  { label: "LinkedIn", value: profile.name, href: profile.linkedin },
+  { label: "github", value: `github.com/${profile.githubHandle}`, href: profile.github },
+  { label: "linkedin", value: profile.name, href: profile.linkedin },
 ];
 
-/** Contact is printed in reverse (ink background, paper text) to close the page. */
-export function Contact() {
-  const ref = useRef<HTMLElement>(null);
-  const reduce = useReducedMotion();
-  const [copied, setCopied] = useState(false);
+const row =
+  "group grid gap-1 border-t border-border py-5 sm:grid-cols-[140px_1fr_auto] sm:items-baseline sm:gap-6";
+const label = "font-mono text-xs text-muted";
+const value = "font-mono text-lg font-medium tracking-tight sm:text-2xl";
 
-  // The heading slides in from the side as the section scrolls up.
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 0.25"] });
-  const x = useTransform(scrollYProgress, [0, 1], reduce ? ["0%", "0%"] : ["12%", "0%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.7], [0.15, 1]);
+export function Contact() {
+  const [copied, setCopied] = useState(false);
 
   const copyEmail = async () => {
     try {
@@ -31,76 +31,86 @@ export function Contact() {
     }
   };
 
-  const rowClass =
-    "grid gap-1 border-t border-background/15 py-5 sm:grid-cols-[160px_1fr_auto] sm:items-baseline sm:gap-6";
-  const labelClass = "font-mono text-[11px] tracking-[0.14em] text-background/55 uppercase";
+  const reveal = (i: number) => ({
+    initial: { opacity: 0, x: -16 },
+    whileInView: { opacity: 1, x: 0 },
+    viewport: { once: true, margin: "-40px" },
+    transition: { delay: 0.1 + i * 0.08, duration: 0.5 },
+  });
 
   return (
-    <section
-      id="contact"
-      ref={ref}
-      className="relative overflow-hidden bg-foreground px-4 pt-24 pb-10 text-background md:px-6 md:pt-36"
-    >
-      <div className="mx-auto max-w-6xl">
-        <p className={labelClass}>
-          05 <span className="mx-1 opacity-40">/</span> Contact
+    <section id="contact" className="relative overflow-hidden border-t border-border bg-card/40 pt-24 pb-10 md:pt-36">
+      <div className="mx-auto max-w-6xl px-5 md:px-8">
+        <p className="font-mono">
+          <span className="text-4xl font-semibold tracking-tight text-accent md:text-5xl">{bin(5)}</span>
+          <span className="ml-2 align-top text-xs text-muted">= 5 · contact</span>
         </p>
-        <motion.h2
-          style={{ x, opacity }}
-          className="mt-6 font-serif text-[clamp(3.75rem,13vw,11rem)] leading-[0.88] tracking-[-0.03em]"
-        >
-          Let&apos;s build
-          <br />
-          <span className="italic text-background/60">something.</span>
-        </motion.h2>
+        <h2 className="mt-6 font-mono text-[clamp(2.6rem,9vw,7.5rem)] leading-[0.95] font-bold tracking-[-0.06em]">
+          <DecodeText text="Let's build" trigger="inView" duration={1.1} className="block" />
+          <DecodeText text="something." trigger="inView" delay={0.3} duration={1.1} className="block text-accent" />
+        </h2>
 
-        <div className="mt-16 border-b border-background/15 md:mt-24">
-          <div className={rowClass}>
-            <span className={labelClass}>Email</span>
-            <a
-              href={`mailto:${profile.email}`}
-              className="font-serif text-[1.35rem] break-all hover:italic sm:text-3xl"
-            >
+        <div className="mt-16 border-b border-border md:mt-20">
+          <motion.div {...reveal(0)} className={row}>
+            <span className={label}>email</span>
+            <a href={`mailto:${profile.email}`} className={`${value} break-all hover:text-accent`}>
               {profile.email}
             </a>
             <button
               type="button"
               onClick={copyEmail}
-              className="justify-self-start font-mono text-[11px] tracking-[0.14em] text-background/70 uppercase hover:text-background sm:justify-self-end"
+              className="justify-self-start font-mono text-xs text-muted hover:text-accent sm:justify-self-end"
             >
-              {copied ? "Copied ✓" : "Copy"}
+              {copied ? "copied ✓" : "copy"}
             </button>
-          </div>
-          {links.map((link) => (
-            <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" className={`${rowClass} group`}>
-              <span className={labelClass}>{link.label}</span>
-              <span className="font-serif text-[1.35rem] group-hover:italic sm:text-3xl">{link.value}</span>
-              <span className="hidden text-background/60 transition group-hover:translate-x-1 group-hover:text-background sm:block">
+          </motion.div>
+          {links.map((link, i) => (
+            <motion.a
+              key={link.label}
+              {...reveal(i + 1)}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={row}
+            >
+              <span className={label}>{link.label}</span>
+              <span className={`${value} group-hover:text-accent`}>{link.value}</span>
+              <span className="hidden font-mono text-muted transition group-hover:translate-x-1 group-hover:text-accent sm:block">
                 ↗
               </span>
-            </a>
+            </motion.a>
           ))}
-          <div className={rowClass}>
-            <span className={labelClass}>Based in</span>
-            <span className="font-serif text-[1.35rem] sm:text-3xl">{profile.location}</span>
-          </div>
-          <button type="button" onClick={openChat} className={`${rowClass} group w-full text-left`}>
-            <span className={labelClass}>Quick question?</span>
-            <span className="font-serif text-[1.35rem] group-hover:italic sm:text-3xl">
-              Ask {assistant.name}, my AI assistant
-            </span>
-            <span className="hidden text-background/60 transition group-hover:translate-x-1 group-hover:text-background sm:block">
+          <motion.div {...reveal(3)} className={row}>
+            <span className={label}>location</span>
+            <span className={value}>{profile.location}</span>
+          </motion.div>
+          <motion.button {...reveal(4)} type="button" onClick={openChat} className={`${row} w-full text-left`}>
+            <span className={label}>quick question?</span>
+            <span className={`${value} group-hover:text-accent`}>ask {assistant.name.toLowerCase()}, my AI assistant</span>
+            <span className="hidden font-mono text-muted transition group-hover:translate-x-1 group-hover:text-accent sm:block">
               →
             </span>
-          </button>
+          </motion.button>
         </div>
-
-        <footer className="mt-20 font-mono text-[11px] tracking-[0.08em] text-background/50 uppercase">
-          <p>
-            © {profile.name} · {profile.location.split(",")[0]}
-          </p>
-        </footer>
       </div>
+
+      {/* sign-off: the name in binary, drifting past */}
+      <div aria-hidden className="mt-20">
+        <InfiniteMovingCards
+          items={[toBinary(profile.name)]}
+          speed="slow"
+          separator="·"
+          pauseOnHover={false}
+          itemClassName="font-mono text-sm text-foreground/25"
+        />
+      </div>
+
+      <footer className="mx-auto mt-8 flex max-w-6xl flex-col gap-2 px-5 font-mono text-xs text-muted sm:flex-row sm:justify-between md:px-8">
+        <p>
+          © {profile.name} · {profile.location.split(",")[0]}
+        </p>
+        <p>{"// EOF"}</p>
+      </footer>
     </section>
   );
 }

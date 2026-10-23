@@ -11,6 +11,7 @@ export const InfiniteMovingCards = ({
   pauseOnHover = true,
   className,
   itemClassName,
+  separator = "·",
 }: {
   items: string[];
   direction?: "left" | "right";
@@ -18,6 +19,7 @@ export const InfiniteMovingCards = ({
   pauseOnHover?: boolean;
   className?: string;
   itemClassName?: string;
+  separator?: string;
 }) => {
   const duration = speed === "fast" ? "30s" : speed === "normal" ? "60s" : "110s";
 
@@ -44,7 +46,7 @@ export const InfiniteMovingCards = ({
             className={cn("flex shrink-0 items-center gap-6 whitespace-nowrap", itemClassName)}
           >
             {item}
-            <span className="text-[0.5em] text-accent">✱</span>
+            <span className="text-[0.6em] text-accent">{separator}</span>
           </li>
         ))}
       </ul>

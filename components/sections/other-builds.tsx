@@ -21,7 +21,7 @@ export function OtherBuilds() {
               transition={{ delay: i * 0.06, duration: 0.5 }}
               className="grid gap-2 border-t border-border py-5 sm:grid-cols-[200px_1fr] sm:gap-6"
             >
-              <h3 className="font-serif text-2xl">{build.name}</h3>
+              <h3 className="font-mono text-xl font-semibold">{build.name}</h3>
               <div>
                 <p className="text-[15px] text-foreground/80">{build.description}</p>
                 <p className="mt-2 font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
