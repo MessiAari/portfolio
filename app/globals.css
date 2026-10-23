@@ -3,25 +3,26 @@
 /* Dark mode is driven by a `.dark` class on <html> (set by the theme toggle). */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Light theme: cream paper + warm ink */
+/* Light theme = state 0: cream paper + near-black ink, cobalt accent.
+   (Keep in sync with lib/theme-colors.ts, used by the mode-switch animation.) */
 :root {
-  --background: #f1eadc;
-  --foreground: #1c1a17;
-  --muted: #6b6357;
-  --card: #e9e0cd;
-  --border: rgb(28 26 23 / 0.16);
-  --accent: #b23a15;
+  --background: #f2efe9;
+  --foreground: #131313;
+  --muted: #6b6a66;
+  --card: #e9e5dd;
+  --border: rgb(19 19 19 / 0.12);
+  --accent: #2f54eb;
   color-scheme: light;
 }
 
-/* Dark theme: warm charcoal + cream ink */
+/* Dark theme = state 1: near-black + cream, brighter cobalt */
 .dark {
-  --background: #181614;
-  --foreground: #ede5d6;
-  --muted: #a09789;
-  --card: #211e1b;
-  --border: rgb(237 229 214 / 0.13);
-  --accent: #e8835a;
+  --background: #0d0d0f;
+  --foreground: #ece9e2;
+  --muted: #8f8e93;
+  --card: #161619;
+  --border: rgb(236 233 226 / 0.1);
+  --accent: #7d95ff;
   color-scheme: dark;
 }
 
@@ -34,7 +35,6 @@
   --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-instrument-serif);
 
   --animate-scroll: scroll var(--animation-duration, 40s) var(--animation-direction, forwards)
     linear infinite;

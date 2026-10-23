@@ -15,7 +15,7 @@ export function Navbar() {
       }
       // "Home" is the brand link on phones, so it only shows as text on wider screens.
       navItems={navItems.map((item) => ({ ...item, hideOnMobile: item.name === "Home" }))}
-      action={<ThemeToggleButton className="h-8 w-8 p-1.5" />}
+      action={<ThemeToggleButton />}
     />
   );
 }

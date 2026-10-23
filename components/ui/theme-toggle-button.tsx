@@ -1,10 +1,10 @@
 "use client";
-// Skiper UI — Theme toggle button 2 (skiper4, https://skiper-ui.com)
-// Adapted: wired to the site's ThemeProvider instead of local state.
+
 import { motion } from "motion/react";
 import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 
+/** A binary switch: 0 = light, 1 = dark. The knob slides to the active bit. */
 export const ThemeToggleButton = ({ className = "" }: { className?: string }) => {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
@@ -12,58 +12,27 @@ export const ThemeToggleButton = ({ className = "" }: { className?: string }) =>
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={isDark}
       onClick={toggleTheme}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? "Dark mode (1). Switch to light mode (0)" : "Light mode (0). Switch to dark mode (1)"}
+      title={isDark ? "Mode 1 · dark" : "Mode 0 · light"}
       className={cn(
-        "rounded-full p-2 text-foreground transition-all duration-300 hover:bg-foreground/10 active:scale-95",
+        "relative flex h-8 w-[3.75rem] items-center rounded-full border border-foreground/25 font-mono text-[13px] transition-colors hover:border-accent",
         className,
       )}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-        fill="currentColor"
-        strokeLinecap="round"
-        viewBox="0 0 32 32"
-        className="h-full w-full"
+      <span className="flex w-1/2 justify-center text-muted">0</span>
+      <span className="flex w-1/2 justify-center text-muted">1</span>
+      <motion.span
+        aria-hidden
+        initial={false}
+        animate={{ x: isDark ? "100%" : "0%" }}
+        transition={{ type: "spring", stiffness: 500, damping: 32 }}
+        className="absolute top-0.5 bottom-0.5 left-0.5 flex w-[calc(50%-2px)] items-center justify-center rounded-full bg-foreground text-background"
       >
-        <clipPath id="skiper-btn-2">
-          <motion.path
-            animate={{ y: isDark ? 10 : 0, x: isDark ? -12 : 0 }}
-            transition={{ ease: "easeInOut", duration: 0.35 }}
-            d="M0-5h30a1 1 0 0 0 9 13v24H0Z"
-          />
-        </clipPath>
-        <g clipPath="url(#skiper-btn-2)">
-          <motion.circle
-            animate={{ r: isDark ? 10 : 8 }}
-            initial={false}
-            transition={{ ease: "easeInOut", duration: 0.35 }}
-            cx="16"
-            cy="16"
-          />
-          <motion.g
-            animate={{
-              rotate: isDark ? -100 : 0,
-              scale: isDark ? 0.5 : 1,
-              opacity: isDark ? 0 : 1,
-            }}
-            transition={{ ease: "easeInOut", duration: 0.35 }}
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <path d="M16 5.5v-4" />
-            <path d="M16 30.5v-4" />
-            <path d="M1.5 16h4" />
-            <path d="M26.5 16h4" />
-            <path d="m23.4 8.6 2.8-2.8" />
-            <path d="m5.7 26.3 2.9-2.9" />
-            <path d="m5.8 5.8 2.8 2.8" />
-            <path d="m23.4 23.4 2.9 2.9" />
-          </motion.g>
-        </g>
-      </svg>
+        {isDark ? "1" : "0"}
+      </motion.span>
     </button>
   );
 };

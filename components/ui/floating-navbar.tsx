@@ -41,7 +41,7 @@ export const FloatingNav = ({
       )}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 md:h-16 md:px-6">
-        <a href="#home" className="font-serif text-xl leading-none whitespace-nowrap md:text-2xl">
+        <a href="#home" className="font-mono text-sm font-medium tracking-tight whitespace-nowrap md:text-base">
           {brand}
         </a>
         <div className="flex items-center gap-3 sm:gap-6">
